@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Archivo:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 
@@ -95,38 +95,23 @@
 <section>
   <div class="wrap">
     <div class="section-head">
-      <h2>Due eventi, un solo filo conduttore</h2>
+      <h2>Le serate che abbiamo già vissuto</h2>
       <a href="serate.html" class="section-link">Tutti gli appuntamenti</a>
     </div>
     <!--
-      Questa griglia viene generata da js/eventi.js in base agli appuntamenti
-      con la casella "Mostra nella sezione 'Due eventi' della home" spuntata
-      nel pannello appuntamenti (admin-eventi.html): il contenuto qui sotto è
-      solo il segnaposto mostrato finché lo script non è ancora partito.
+      Questa fila viene generata da js/eventi.js con tutti gli appuntamenti
+      segnati come "Svolto" nel pannello (dal più recente), scorrevole in
+      orizzontale con le frecce (stesso meccanismo della galleria nelle
+      pagine evento) così anche con molte serate passate la home non si
+      allunga. Il paragrafo qui sotto è solo il segnaposto mostrato finché
+      lo script non è ancora partito.
     -->
-    <div class="event-grid" id="vetrina-grid">
-      <article class="event-card">
-        <div class="media">
-          <img src="img/eventi/barolo-barbaresco.jpg" alt="Locandina Barolo e Barbaresco vista mare, 2° edizione" class="img-contain">
-        </div>
-        <div class="body">
-          <h3>Barolo e Barbaresco vista mare</h3>
-          <p class="when">23 ottobre — Ristorante 116, Terracina</p>
-          <p>Il Piemonte incontra il litorale pontino: una degustazione guidata tra i due grandi rossi delle Langhe.</p>
-          <a href="evento-barolo-barbaresco.html" class="btn btn-outline">Scopri l'evento</a>
-        </div>
-      </article>
-      <article class="event-card">
-        <div class="media">
-          <img src="https://images.unsplash.com/photo-1742665764542-aff4f4bc064e?auto=format&fit=crop&w=1200&q=80" alt="Trulli tradizionali di Alberobello, Puglia">
-        </div>
-        <div class="body">
-          <h3>Sud Wine Festival</h3>
-          <p class="when">Data in via di definizione</p>
-          <p>Un festival dedicato ai vitigni e ai produttori del Sud Italia: Campania, Puglia, Sicilia, Calabria e Basilicata in un solo evento.</p>
-          <a href="evento-sud-wine-festival.html" class="btn btn-outline">Scopri l'evento</a>
-        </div>
-      </article>
+    <div class="gallery-wrap">
+      <button type="button" class="gallery-nav gallery-prev" aria-label="Evento precedente">&#8249;</button>
+      <div class="gallery-scroll" id="passati-grid">
+        <p class="form-note">Caricamento…</p>
+      </div>
+      <button type="button" class="gallery-nav gallery-next" aria-label="Evento successivo">&#8250;</button>
     </div>
   </div>
 </section>
@@ -183,7 +168,7 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=5"></script>
-<script src="js/eventi.js?v=8"></script>
+<script src="js/main.js?v=6"></script>
+<script src="js/eventi.js?v=9"></script>
 </body>
 </html>

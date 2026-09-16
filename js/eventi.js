@@ -72,9 +72,27 @@
     return '<p>' + s + '</p>';
   }
 
-  // riassunto in testo semplice (usato nelle anteprime, es. elenco serate.html)
+  // riassunto in testo semplice, senza nessuna formattazione (usato ad es.
+  // nel meta tag o dove serve solo testo puro)
   function testoSenzaTag(html) {
     return String(html == null ? '' : html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  // anteprima con la formattazione (grassetto/corsivo/link) ma senza andare
+  // a capo: usata nei riquadri della home e nelle card, dove la descrizione
+  // finisce dentro un unico paragrafo breve. I paragrafi/elenchi dell'editor
+  // vengono "appiattiti" con uno spazio al posto del ritorno a capo.
+  function formattoInline(html) {
+    var pulito = sanitizeRichHtml(html);
+    return pulito
+      .replace(/<\/(p|ul|ol)>\s*<(p|ul|ol)[^>]*>/gi, ' ')
+      .replace(/<\/?p[^>]*>/gi, '')
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/<li[^>]*>/gi, '• ')
+      .replace(/<\/li>/gi, ' ')
+      .replace(/<\/?(ul|ol)[^>]*>/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   // immagine di un appuntamento: quella caricata dal pannello, altrimenti
@@ -148,7 +166,11 @@
       var campo = el.getAttribute('data-prossimo');
       var valore = ev[campo];
       if (valore == null || valore === '') return;
-      el.textContent = campo === 'descrizione' ? testoSenzaTag(valore) : valore;
+      if (campo === 'descrizione') {
+        el.innerHTML = formattoInline(valore);
+      } else {
+        el.textContent = valore;
+      }
     });
     var linkPrenota = sezione.querySelector('[data-prossimo-link="prenota"]');
     if (linkPrenota) linkPrenota.setAttribute('href', 'prenota.html?evento=' + encodeURIComponent(ev.slug));
@@ -189,7 +211,11 @@
       var campo = el.getAttribute('data-ultimo');
       var valore = ev[campo];
       if (valore == null || valore === '') return;
-      el.textContent = campo === 'descrizione' ? testoSenzaTag(valore) : valore;
+      if (campo === 'descrizione') {
+        el.innerHTML = formattoInline(valore);
+      } else {
+        el.textContent = valore;
+      }
     });
     var img = sezione.querySelector('[data-ultimo-img]');
     if (img) {
@@ -262,7 +288,7 @@
       '<span class="' + badgeClass + '">' + badgeLabel + '</span>' +
       '<h3>' + escHtml(ev.titolo) + '</h3>' +
       '<p class="meta-line">' + escHtml(ev.luogo || '') + '</p>' +
-      '<p>' + escHtml(testoSenzaTag(ev.descrizione)) + '</p>' +
+      '<p>' + formattoInline(ev.descrizione) + '</p>' +
       (azioni ? '<div class="actions">' + azioni + '</div>' : '') +
       '</div>' +
       '<div class="thumb"><img' + classeImg + ' src="' + img + '" alt="' + escHtml(ev.titolo) + '"></div>' +
@@ -271,15 +297,11 @@
     );
   }
 
-  // --- home: sezione "Due eventi, un solo filo conduttore" ---
-  // mostra gli appuntamenti marcati "vetrina" dal pannello (nell'ordine
-  // impostato con il campo "Ordine"), al posto dei due fissi scritti a mano
-  function troncaTesto(s, max) {
-    var t = (s || '').trim();
-    return t.length > max ? t.slice(0, max - 1).trim() + '…' : t;
-  }
-
-  function vetrinaCardHtml(ev) {
+  // --- home: sezione "Le serate che abbiamo già vissuto" ---
+  // mostra automaticamente TUTTI gli appuntamenti "Svolto" (dal più recente),
+  // in un carosello scorrevole con le frecce — non serve più spuntare nulla
+  // nel pannello, basta segnare l'evento come svolto.
+  function eventoCardHtml(ev) {
     var img = immagineDi(ev);
     var containClass = ev.adattamento_immagine === 'contain' ? ' img-contain' : '';
     var link = DEDICATED_PAGES[ev.slug] || ('evento-' + ev.slug + '.html');
@@ -288,22 +310,33 @@
       '<div class="media"><img class="' + containClass.trim() + '" src="' + img + '" alt="' + escHtml(ev.titolo) + '"></div>' +
       '<div class="body">' +
       '<h3>' + escHtml(ev.titolo) + '</h3>' +
-      '<p class="when">' + escHtml(ev.sottotitolo || ev.data_testo || '') + '</p>' +
-      '<p>' + escHtml(troncaTesto(testoSenzaTag(ev.descrizione), 170)) + '</p>' +
+      '<p class="when">' + escHtml((ev.data_testo || '') + (ev.data_testo && ev.luogo ? ' — ' : '') + (ev.luogo || '')) + '</p>' +
+      '<p>' + formattoInline(ev.descrizione) + '</p>' +
       '<a href="' + link + '" class="btn btn-outline">Scopri l\'evento</a>' +
       '</div>' +
       '</article>'
     );
   }
 
-  function hydrateVetrina(eventi) {
-    var holder = document.getElementById('vetrina-grid');
+  function hydratePassati(eventi) {
+    var holder = document.getElementById('passati-grid');
     if (!holder) return;
-    var scelti = eventi
-      .filter(function (e) { return !!e.vetrina; })
+    var oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+    var svolti = eventi.filter(function (e) { return e.stato === 'svolto'; });
+
+    var conData = svolti
+      .map(function (e) { return { e: e, d: dataIsoValida(e.data_iso) }; })
+      .filter(function (x) { return x.d && x.d <= oggi; })
+      .sort(function (a, b) { return b.d - a.d; }) // dal più recente
+      .map(function (x) { return x.e; });
+    var senzaData = svolti
+      .filter(function (e) { return !dataIsoValida(e.data_iso); })
       .sort(function (a, b) { return (a.ordine || 0) - (b.ordine || 0); });
-    if (!scelti.length) return; // nessuno impostato: resta il segnaposto nell'HTML
-    holder.innerHTML = scelti.map(vetrinaCardHtml).join('');
+
+    var ordinati = conData.concat(senzaData);
+    if (!ordinati.length) return; // nessuna serata svolta ancora: resta il segnaposto nell'HTML
+    holder.innerHTML = ordinati.map(eventoCardHtml).join('');
   }
 
   function hydrateTimeline(eventi) {
@@ -335,7 +368,7 @@
         hydrateCampi(bySlug);
         hydrateProssimo(eventi);
         hydrateUltimo(eventi);
-        hydrateVetrina(eventi);
+        hydratePassati(eventi);
         hydrateTimeline(eventi);
         hydrateSelectPrenota(eventi);
       })

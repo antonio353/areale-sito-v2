@@ -24,7 +24,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!scroller) return;
 
     function passoScorrimento() {
-      var item = scroller.querySelector('.gallery-item');
+      // funziona sia con le foto della galleria (.gallery-item) sia con le
+      // card evento (.event-card, es. sezione "Due eventi" della home): usa
+      // il primo figlio, qualunque esso sia
+      var item = scroller.firstElementChild;
       var passo = item ? item.getBoundingClientRect().width + 18 : scroller.clientWidth * 0.8;
       return passo;
     }
