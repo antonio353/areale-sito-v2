@@ -9,8 +9,14 @@ function escHtml(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// toglie i tag HTML (la descrizione può ora contenere grassetto/corsivo/elenchi
+// scritti con l'editor del pannello) per ottenere un riassunto in testo semplice
+function testoSenzaTag(s) {
+  return String(s == null ? '' : s).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 function metaDescrizione(ev) {
-  const testo = (ev.descrizione || ev.sottotitolo || ev.titolo || '').replace(/\s+/g, ' ').trim();
+  const testo = testoSenzaTag(ev.descrizione) || testoSenzaTag(ev.sottotitolo) || testoSenzaTag(ev.titolo);
   return testo.length > 155 ? testo.slice(0, 152) + '…' : testo;
 }
 
@@ -19,7 +25,14 @@ function eventoPageHtml(ev) {
   const slugEnc = encodeURIComponent(ev.slug);
   const titolo = escHtml(ev.titolo || 'Appuntamento');
   const sottotitolo = escHtml(ev.sottotitolo || '');
-  const descrizione = escHtml(ev.descrizione || '');
+  // fallback mostrato prima che js/eventi.js carichi e ripulisca la versione
+  // formattata dal server; se il testo salvato contiene già dei tag (scritto
+  // con l'editor grassetto/corsivo/elenchi) lo passa così com'è, altrimenti
+  // lo tratta come testo semplice
+  const descrizioneGrezza = ev.descrizione || '';
+  const descrizione = descrizioneGrezza.indexOf('<') !== -1
+    ? descrizioneGrezza
+    : '<p>' + escHtml(descrizioneGrezza) + '</p>';
   const luogo = escHtml(ev.luogo || '');
   const dataTesto = escHtml(ev.data_testo || '');
   const immagine = ev.immagine ? escHtml(ev.immagine) : IMMAGINE_DEFAULT;
@@ -35,7 +48,7 @@ function eventoPageHtml(ev) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Archivo:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 
@@ -76,7 +89,7 @@ function eventoPageHtml(ev) {
       <h2>Descrizione</h2>
     </div>
     <div class="prose-wide" data-evento="${slug}:descrizione" data-evento-rich>
-      <p>${descrizione}</p>
+      ${descrizione}
     </div>
   </div>
 </section>
@@ -128,8 +141,8 @@ function eventoPageHtml(ev) {
   </div>
 </footer>
 
-<script src="js/main.js?v=3"></script>
-<script src="js/eventi.js?v=3"></script>
+<script src="js/main.js?v=5"></script>
+<script src="js/eventi.js?v=6"></script>
 </body>
 </html>
 `;

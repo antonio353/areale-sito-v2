@@ -15,6 +15,61 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Galleria orizzontale (pagine evento): scorrimento con i pulsanti
+  // prev/next invece della barra di scorrimento (nascosta via CSS).
+  document.querySelectorAll('.gallery-wrap').forEach(function (wrap) {
+    var scroller = wrap.querySelector('.gallery-scroll');
+    var prevBtn = wrap.querySelector('.gallery-prev');
+    var nextBtn = wrap.querySelector('.gallery-next');
+    if (!scroller) return;
+
+    function passoScorrimento() {
+      var item = scroller.querySelector('.gallery-item');
+      var passo = item ? item.getBoundingClientRect().width + 18 : scroller.clientWidth * 0.8;
+      return passo;
+    }
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function () {
+        scroller.scrollBy({ left: -passoScorrimento(), behavior: 'smooth' });
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        scroller.scrollBy({ left: passoScorrimento(), behavior: 'smooth' });
+      });
+    }
+  });
+
+  // Lightbox: clic su una foto della galleria per vederla ingrandita.
+  var lightbox = document.getElementById('lightbox');
+  if (lightbox) {
+    var lightboxImg = lightbox.querySelector('img');
+    var lightboxClose = lightbox.querySelector('.lightbox-close');
+
+    function apriLightbox(src, alt) {
+      lightboxImg.src = src;
+      lightboxImg.alt = alt || '';
+      lightbox.hidden = false;
+    }
+    function chiudiLightbox() {
+      lightbox.hidden = true;
+      lightboxImg.src = '';
+    }
+
+    document.querySelectorAll('.gallery-scroll .gallery-item img').forEach(function (img) {
+      img.addEventListener('click', function () {
+        apriLightbox(img.currentSrc || img.src, img.alt);
+      });
+    });
+    if (lightboxClose) lightboxClose.addEventListener('click', chiudiLightbox);
+    lightbox.addEventListener('click', function (e) {
+      if (e.target === lightbox) chiudiLightbox();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !lightbox.hidden) chiudiLightbox();
+    });
+  }
+
   // Pagina prenota.html: pre-seleziona la serata da ?evento=slug
   var select = document.querySelector('[data-evento-select]');
   if (select) {

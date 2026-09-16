@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Archivo:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=5">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 
@@ -33,7 +33,7 @@
 </header>
 
 <section class="hero" style="min-height: 62vh;">
-  <img src="img/eventi/barolo-barbaresco.jpg" alt="Locandina Barolo e Barbaresco vista mare, 2° edizione" data-evento-img="barolo-barbaresco">
+  <img src="https://images.unsplash.com/photo-1749217327112-b208e652e82e?auto=format&fit=crop&w=2400&q=80" alt="Vigneto delle Langhe a La Morra, colline verdi con filari di vite">
   <div class="hero-content">
     <span class="legend"><span class="dot"></span>Evento speciale</span>
     <h1 data-evento="barolo-barbaresco:titolo">Barolo e Barbaresco vista mare</h1>
@@ -56,7 +56,7 @@
         </div>
       </div>
       <div class="feature-media">
-        <img src="https://images.unsplash.com/photo-1775807346196-c12ab3c53d73?auto=format&fit=crop&w=1200&q=80" alt="Tramonto sul mare visto da una terrazza">
+        <img src="img/eventi/barolo-barbaresco.jpg" alt="Locandina Barolo e Barbaresco vista mare, 2° edizione" data-evento-img="barolo-barbaresco">
       </div>
     </div>
   </div>
@@ -74,14 +74,18 @@
       (stessa cartella img/eventi, o un'altra a tua scelta) quando le avrai.
       Per aggiungere una foto in più, copia un blocco <div class="gallery-item">...</div>.
     -->
-    <div class="gallery-scroll">
-      <div class="gallery-item"><img src="img/eventi/barolo-barbaresco.jpg" alt="Locandina Barolo e Barbaresco vista mare"></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1775807346196-c12ab3c53d73?auto=format&fit=crop&w=900&q=80" alt="Tramonto sul mare visto dalla terrazza del Ristorante 116"></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1662624335971-57960e9e669f?auto=format&fit=crop&w=900&q=80" alt="Vigneto al tramonto a Barbaresco, Langhe"></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1676476623306-566a9b7afc44?auto=format&fit=crop&w=900&q=80" alt="Tavolo con calici durante una degustazione"></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1749217327112-b208e652e82e?auto=format&fit=crop&w=900&q=80" alt="Colline vitate delle Langhe a La Morra"></div>
+    <div class="gallery-wrap">
+      <button type="button" class="gallery-nav gallery-prev" aria-label="Foto precedente">&#8249;</button>
+      <div class="gallery-scroll">
+        <div class="gallery-item"><img src="img/eventi/barolo-barbaresco.jpg" alt="Locandina Barolo e Barbaresco vista mare"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1775807346196-c12ab3c53d73?auto=format&fit=crop&w=1400&q=80" alt="Tramonto sul mare visto dalla terrazza del Ristorante 116"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1662624335971-57960e9e669f?auto=format&fit=crop&w=1400&q=80" alt="Vigneto al tramonto a Barbaresco, Langhe"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1676476623306-566a9b7afc44?auto=format&fit=crop&w=1400&q=80" alt="Tavolo con calici durante una degustazione"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1749217327112-b208e652e82e?auto=format&fit=crop&w=1400&q=80" alt="Colline vitate delle Langhe a La Morra"></div>
+      </div>
+      <button type="button" class="gallery-nav gallery-next" aria-label="Foto successiva">&#8250;</button>
     </div>
-    <p class="gallery-hint">Foto della prima edizione e delle Langhe — verranno sostituite con gli scatti di questa serata.</p>
+    <p class="gallery-hint">Foto della prima edizione e delle Langhe — verranno sostituite con gli scatti di questa serata. Clicca su una foto per vederla più grande.</p>
   </div>
 </section>
 
@@ -159,7 +163,12 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=3"></script>
-<script src="js/eventi.js?v=4"></script>
+<div class="lightbox" id="lightbox" hidden>
+  <button type="button" class="lightbox-close" aria-label="Chiudi">&times;</button>
+  <img src="" alt="">
+</div>
+
+<script src="js/main.js?v=5"></script>
+<script src="js/eventi.js?v=6"></script>
 </body>
 </html>

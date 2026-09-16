@@ -19,6 +19,102 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  // --- descrizione con formattazione (grassetto, corsivo, elenchi) ---
+  // stessa logica di pulizia usata sul sito pubblico (js/eventi.js), copiata
+  // qui perché il pannello admin è servito a parte e non condivide moduli.
+  var RTE_TAG_CONSENTITI = { P: 1, BR: 1, B: 1, STRONG: 1, I: 1, EM: 1, UL: 1, OL: 1, LI: 1, A: 1 };
+  function sanitizeRichHtml(html) {
+    var tpl = document.createElement('template');
+    tpl.innerHTML = String(html == null ? '' : html);
+    (function pulisci(nodo) {
+      Array.prototype.slice.call(nodo.childNodes).forEach(function (figlio) {
+        if (figlio.nodeType === Node.COMMENT_NODE) {
+          nodo.removeChild(figlio);
+          return;
+        }
+        if (figlio.nodeType === Node.TEXT_NODE) return;
+        if (figlio.nodeType !== Node.ELEMENT_NODE) {
+          nodo.removeChild(figlio);
+          return;
+        }
+        pulisci(figlio);
+        if (!RTE_TAG_CONSENTITI[figlio.tagName]) {
+          while (figlio.firstChild) nodo.insertBefore(figlio.firstChild, figlio);
+          nodo.removeChild(figlio);
+          return;
+        }
+        var hrefValida = null;
+        if (figlio.tagName === 'A') {
+          var href = figlio.getAttribute('href') || '';
+          if (/^(https?:|mailto:)/i.test(href)) hrefValida = href;
+        }
+        Array.prototype.slice.call(figlio.attributes).forEach(function (attr) {
+          figlio.removeAttribute(attr.name);
+        });
+        if (hrefValida) {
+          figlio.setAttribute('href', hrefValida);
+          figlio.setAttribute('rel', 'noopener');
+          figlio.setAttribute('target', '_blank');
+        }
+      });
+    })(tpl.content);
+    return tpl.innerHTML;
+  }
+
+  function garantisceBlocco(html) {
+    var s = (html || '').trim();
+    if (!s) return '';
+    if (/^<(p|ul|ol)[ >]/i.test(s)) return s;
+    return '<p>' + s + '</p>';
+  }
+
+  // valore salvato -> HTML iniziale dell'editor: se è testo semplice (vecchio
+  // formato, nessun tag) lo trasforma in paragrafi; se è già HTML formattato
+  // lo ripulisce e basta.
+  function testoInizialeEditor(valore) {
+    var s = String(valore == null ? '' : valore);
+    if (!s.trim()) return '';
+    if (s.indexOf('<') === -1) {
+      var paragrafi = s.split(/\n{2,}/).map(function (p) { return p.trim(); }).filter(Boolean);
+      if (!paragrafi.length) return '';
+      return paragrafi.map(function (p) {
+        return '<p>' + escHtml(p).replace(/\n/g, '<br>') + '</p>';
+      }).join('');
+    }
+    return garantisceBlocco(sanitizeRichHtml(s));
+  }
+
+  function rteHtml(id, label, valore) {
+    return '<div class="campo full">' +
+      '<label for="' + id + '">' + label + '</label>' +
+      '<div class="rte-toolbar" data-target="' + id + '">' +
+        '<button type="button" data-cmd="bold" title="Grassetto"><b>G</b></button>' +
+        '<button type="button" data-cmd="italic" title="Corsivo"><i>C</i></button>' +
+        '<button type="button" data-cmd="insertUnorderedList" title="Elenco puntato">&#8226;</button>' +
+      '</div>' +
+      '<div class="rte-editor" id="' + id + '" contenteditable="true">' + testoInizialeEditor(valore) + '</div>' +
+    '</div>';
+  }
+
+  function attaccaRte(root) {
+    root.querySelectorAll('.rte-toolbar').forEach(function (toolbar) {
+      var editor = document.getElementById(toolbar.getAttribute('data-target'));
+      if (!editor) return;
+      toolbar.querySelectorAll('button').forEach(function (btn) {
+        btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+        btn.addEventListener('click', function () {
+          editor.focus();
+          document.execCommand(btn.getAttribute('data-cmd'), false, null);
+        });
+      });
+    });
+  }
+
+  function leggiDescrizione(editorId) {
+    var editor = document.getElementById(editorId);
+    return garantisceBlocco(sanitizeRichHtml(editor ? editor.innerHTML : '')).trim();
+  }
+
   function immaginePreviewHtml(ev) {
     if (ev && ev.immagine) {
       return '<img class="img-preview" src="' + escHtml(ev.immagine) + '?t=' + Date.now() + '" alt="Anteprima immagine">';
@@ -50,10 +146,7 @@
             '</select>' +
           '</div>' +
           campoHtml('ordine-' + id, 'Ordine (i più bassi vengono prima)', ev.ordine, 'number') +
-          '<div class="campo full">' +
-            '<label for="descrizione-' + id + '">Descrizione</label>' +
-            '<textarea id="descrizione-' + id + '">' + escHtml(ev.descrizione) + '</textarea>' +
-          '</div>' +
+          rteHtml('descrizione-' + id, 'Descrizione', ev.descrizione) +
           '<div class="campo full">' +
             '<label>Immagine di presentazione</label>' +
             '<div class="img-upload-row" data-role="img-row">' +
@@ -87,12 +180,13 @@
       luogo: card.querySelector('#luogo-' + id).value.trim(),
       stato: card.querySelector('#stato-' + id).value,
       ordine: Number(card.querySelector('#ordine-' + id).value) || 0,
-      descrizione: card.querySelector('#descrizione-' + id).value.trim(),
+      descrizione: leggiDescrizione('descrizione-' + id),
     };
   }
 
   function attacca(card) {
     var id = card.getAttribute('data-id');
+    attaccaRte(card);
 
     card.querySelector('[data-action="salva"]').addEventListener('click', function () {
       var payload = leggiCampi(card);
@@ -188,10 +282,7 @@
             '</select>' +
           '</div>' +
           campoHtml('n-ordine', 'Ordine', 0, 'number') +
-          '<div class="campo full">' +
-            '<label for="n-descrizione">Descrizione</label>' +
-            '<textarea id="n-descrizione"></textarea>' +
-          '</div>' +
+          rteHtml('n-descrizione', 'Descrizione', '') +
           '<div class="campo full">' +
             '<label for="n-imgfile">Immagine di presentazione (facoltativa, puoi aggiungerla anche dopo)</label>' +
             '<input type="file" accept="image/*" id="n-imgfile">' +
@@ -202,6 +293,8 @@
           '<button type="button" class="btn-del" id="n-annulla">Annulla</button>' +
         '</div>' +
       '</div>';
+
+    attaccaRte(nuovoHolder);
 
     document.getElementById('n-annulla').addEventListener('click', function () {
       nuovoHolder.innerHTML = '';
@@ -217,7 +310,7 @@
         luogo: document.getElementById('n-luogo').value.trim(),
         stato: document.getElementById('n-stato').value,
         ordine: Number(document.getElementById('n-ordine').value) || 0,
-        descrizione: document.getElementById('n-descrizione').value.trim(),
+        descrizione: leggiDescrizione('n-descrizione'),
       };
       var fileImmagine = document.getElementById('n-imgfile').files[0];
 

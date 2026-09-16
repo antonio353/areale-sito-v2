@@ -20,6 +20,63 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  // testo formattato (descrizioni scritte con l'editor del pannello admin):
+  // ripulisce l'HTML tenendo solo i tag di formattazione base, per evitare
+  // che codice o markup indesiderato finisca sulle pagine pubbliche.
+  var RTE_TAG_CONSENTITI = { P: 1, BR: 1, B: 1, STRONG: 1, I: 1, EM: 1, UL: 1, OL: 1, LI: 1, A: 1 };
+  function sanitizeRichHtml(html) {
+    var tpl = document.createElement('template');
+    tpl.innerHTML = String(html == null ? '' : html);
+    (function pulisci(nodo) {
+      Array.prototype.slice.call(nodo.childNodes).forEach(function (figlio) {
+        if (figlio.nodeType === Node.COMMENT_NODE) {
+          nodo.removeChild(figlio);
+          return;
+        }
+        if (figlio.nodeType === Node.TEXT_NODE) return;
+        if (figlio.nodeType !== Node.ELEMENT_NODE) {
+          nodo.removeChild(figlio);
+          return;
+        }
+        pulisci(figlio);
+        if (!RTE_TAG_CONSENTITI[figlio.tagName]) {
+          while (figlio.firstChild) nodo.insertBefore(figlio.firstChild, figlio);
+          nodo.removeChild(figlio);
+          return;
+        }
+        var hrefValida = null;
+        if (figlio.tagName === 'A') {
+          var href = figlio.getAttribute('href') || '';
+          if (/^(https?:|mailto:)/i.test(href)) hrefValida = href;
+        }
+        Array.prototype.slice.call(figlio.attributes).forEach(function (attr) {
+          figlio.removeAttribute(attr.name);
+        });
+        if (hrefValida) {
+          figlio.setAttribute('href', hrefValida);
+          figlio.setAttribute('rel', 'noopener');
+          figlio.setAttribute('target', '_blank');
+        }
+      });
+    })(tpl.content);
+    return tpl.innerHTML;
+  }
+
+  // se il risultato non inizia già con un blocco (p/ul/ol), lo avvolge in
+  // un <p> — serve sia per le vecchie descrizioni in testo semplice, sia
+  // per compatibilità con markup formattato che arriva senza wrapper.
+  function garantisceBlocco(html) {
+    var s = (html || '').trim();
+    if (!s) return '';
+    if (/^<(p|ul|ol)[ >]/i.test(s)) return s;
+    return '<p>' + s + '</p>';
+  }
+
+  // riassunto in testo semplice (usato nelle anteprime, es. elenco serate.html)
+  function testoSenzaTag(html) {
+    return String(html == null ? '' : html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
   // immagine di un appuntamento: quella caricata dal pannello, altrimenti
   // la foto di riserva collegata allo slug, altrimenti una generica
   function immagineDi(ev) {
@@ -36,9 +93,9 @@
       if (valore == null || valore === '') return;
 
       if (el.hasAttribute('data-evento-rich')) {
-        el.innerHTML = '<p>' + escHtml(valore) + '</p>';
+        el.innerHTML = garantisceBlocco(sanitizeRichHtml(valore));
       } else {
-        el.textContent = valore;
+        el.textContent = parts[1] === 'descrizione' ? testoSenzaTag(valore) : valore;
       }
     });
 
@@ -81,9 +138,10 @@
     if (!ev) return; // resta il contenuto statico scritto nell'HTML
 
     sezione.querySelectorAll('[data-prossimo]').forEach(function (el) {
-      var valore = ev[el.getAttribute('data-prossimo')];
+      var campo = el.getAttribute('data-prossimo');
+      var valore = ev[campo];
       if (valore == null || valore === '') return;
-      el.textContent = valore;
+      el.textContent = campo === 'descrizione' ? testoSenzaTag(valore) : valore;
     });
     var linkPrenota = sezione.querySelector('[data-prossimo-link="prenota"]');
     if (linkPrenota) linkPrenota.setAttribute('href', 'prenota.html?evento=' + encodeURIComponent(ev.slug));
@@ -118,9 +176,10 @@
     if (!ev) return; // resta il contenuto statico scritto nell'HTML
 
     sezione.querySelectorAll('[data-ultimo]').forEach(function (el) {
-      var valore = ev[el.getAttribute('data-ultimo')];
+      var campo = el.getAttribute('data-ultimo');
+      var valore = ev[campo];
       if (valore == null || valore === '') return;
-      el.textContent = valore;
+      el.textContent = campo === 'descrizione' ? testoSenzaTag(valore) : valore;
     });
     var img = sezione.querySelector('[data-ultimo-img]');
     if (img) img.src = immagineDi(ev);
@@ -189,7 +248,7 @@
       '<span class="' + badgeClass + '">' + badgeLabel + '</span>' +
       '<h3>' + escHtml(ev.titolo) + '</h3>' +
       '<p class="meta-line">' + escHtml(ev.luogo || '') + '</p>' +
-      '<p>' + escHtml(ev.descrizione || '') + '</p>' +
+      '<p>' + escHtml(testoSenzaTag(ev.descrizione)) + '</p>' +
       (azioni ? '<div class="actions">' + azioni + '</div>' : '') +
       '</div>' +
       '<div class="thumb"><img src="' + img + '" alt="' + escHtml(ev.titolo) + '"></div>' +
