@@ -278,7 +278,7 @@ nav.main-nav a.current{ border-color: var(--ink); }
   max-width: 46ch;
   margin-bottom: 1.6em;
 }
-.hero .cta-row{ display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; }
+.cta-row{ display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; }
 .hero .cta-row .btn-ghost{ color: var(--paper); }
 
 /* -------------------- contour motif -------------------- */
@@ -329,6 +329,10 @@ section.tight{ padding: 56px 0; }
   border: 1px solid var(--line);
 }
 .feature-media img{ width: 100%; height: 100%; object-fit: cover; }
+/* per le immagini che non vanno ritagliate (es. locandine con testo vicino
+   ai bordi): il pannello appuntamenti permette di scegliere "mostra tutta
+   l'immagine" evento per evento, che aggiunge questa classe via JS */
+.img-contain{ object-fit: contain !important; background: var(--stone); }
 /* prossimo/ultimo appuntamento in home: le immagini caricate dal pannello
    sono spesso locandine in formato quadrato (tipo post Instagram) */
 #prossima-serata .feature-media,
@@ -381,7 +385,7 @@ section.tight{ padding: 56px 0; }
   display: flex;
   flex-direction: column;
 }
-.event-card .media{ aspect-ratio: 16/10; overflow: hidden; }
+.event-card .media{ aspect-ratio: 4/3; overflow: hidden; }
 .event-card .media img{ width: 100%; height: 100%; object-fit: cover; }
 .event-card .body{ padding: 26px 28px 30px; flex: 1; display: flex; flex-direction: column; }
 .event-card h3{ margin-bottom: 0.35em; }

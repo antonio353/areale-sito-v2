@@ -103,7 +103,14 @@
     document.querySelectorAll('[data-evento-img]').forEach(function (el) {
       var slug = el.getAttribute('data-evento-img');
       var ev = bySlug[slug];
-      if (ev) el.src = immagineDi(ev);
+      if (!ev) return;
+      el.src = immagineDi(ev);
+      // gli sfondi delle sezioni "hero" restano sempre a tutto schermo
+      // (ritagliati): la scelta "mostra tutta l'immagine" vale per le altre
+      // immagini (card, box "il concept", ecc.)
+      if (!el.closest('.hero')) {
+        el.classList.toggle('img-contain', ev.adattamento_immagine === 'contain');
+      }
     });
   }
 
@@ -148,7 +155,10 @@
     var linkScopri = sezione.querySelector('[data-prossimo-link="scopri"]');
     if (linkScopri) linkScopri.setAttribute('href', 'evento-' + ev.slug + '.html');
     var img = sezione.querySelector('[data-prossimo-img]');
-    if (img) img.src = immagineDi(ev);
+    if (img) {
+      img.src = immagineDi(ev);
+      img.classList.toggle('img-contain', ev.adattamento_immagine === 'contain');
+    }
   }
 
   // --- "ultimo appuntamento svolto" in home: sceglie l'evento svolto con
@@ -182,7 +192,10 @@
       el.textContent = campo === 'descrizione' ? testoSenzaTag(valore) : valore;
     });
     var img = sezione.querySelector('[data-ultimo-img]');
-    if (img) img.src = immagineDi(ev);
+    if (img) {
+      img.src = immagineDi(ev);
+      img.classList.toggle('img-contain', ev.adattamento_immagine === 'contain');
+    }
   }
 
   // --- prenota.html: popola il menu a tendina con gli appuntamenti in
@@ -228,6 +241,7 @@
   // --- elenco completo (serate.html): due contenitori, uno per stato ---
   function timelineItemHtml(ev, isPast) {
     var img = immagineDi(ev);
+    var classeImg = ev.adattamento_immagine === 'contain' ? ' class="img-contain"' : '';
     var senzaData = !ev.data_testo || /definizione/i.test(ev.data_testo);
     var badgeClass = isPast ? 'badge filled' : (senzaData ? 'badge' : 'badge garnet');
     var badgeLabel = isPast ? 'Svolta' : (senzaData ? 'Prossimamente' : 'Posti disponibili');
@@ -251,7 +265,7 @@
       '<p>' + escHtml(testoSenzaTag(ev.descrizione)) + '</p>' +
       (azioni ? '<div class="actions">' + azioni + '</div>' : '') +
       '</div>' +
-      '<div class="thumb"><img src="' + img + '" alt="' + escHtml(ev.titolo) + '"></div>' +
+      '<div class="thumb"><img' + classeImg + ' src="' + img + '" alt="' + escHtml(ev.titolo) + '"></div>' +
       '</div>' +
       '</div>'
     );

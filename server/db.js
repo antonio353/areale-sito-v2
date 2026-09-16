@@ -58,6 +58,8 @@ function seedEventiIfEmpty() {
       descrizione: "Due grandi Nebbiolo del Piemonte, Barolo e Barbaresco, in un unico appuntamento affacciato sul mare di Terracina. Un percorso guidato tra etichette, produttori e un menù pensato per accompagnare ogni calice.",
       stato: 'in_programma',
       ordine: 1,
+      // la locandina è quadrata: "contain" la mostra intera invece di ritagliarla
+      adattamento_immagine: 'contain',
     },
     {
       slug: 'sud-wine-festival',
@@ -90,11 +92,13 @@ function seedEventiIfEmpty() {
 // colonne nuove senza toccare i dati già presenti.
 function ensureColumn(table, column, decl) {
   const info = db.exec(`PRAGMA table_info(${table});`);
-  if (!info.length) return;
+  if (!info.length) return false;
   const cols = info[0].values.map((row) => row[1]);
   if (!cols.includes(column)) {
     db.run(`ALTER TABLE ${table} ADD COLUMN ${column} ${decl};`);
+    return true;
   }
+  return false;
 }
 
 // Per chi aveva già i 3 appuntamenti di esempio prima dell'introduzione della
@@ -111,6 +115,16 @@ function backfillDateIsoIfMissing() {
       db.run('UPDATE eventi SET data_iso = ? WHERE id = ?', [note[slug], ev.id]);
     }
   });
+}
+
+// Al primo avvio dopo l'introduzione di "adattamento_immagine" (colonna appena
+// aggiunta con ALTER TABLE, quindi valorizzata a 'cover' per tutti): la
+// locandina di Barolo & Barbaresco è quadrata, quindi la imposta a 'contain'
+// una volta sola così non risulta già tagliata (si può comunque cambiare dal
+// pannello appuntamenti in qualunque momento).
+function backfillAdattamentoImmagineBarolo() {
+  const ev = getEvento('barolo-barbaresco');
+  if (ev) db.run("UPDATE eventi SET adattamento_immagine = 'contain' WHERE id = ?", [ev.id]);
 }
 
 async function init() {
@@ -158,15 +172,19 @@ async function init() {
       stato        TEXT NOT NULL DEFAULT 'in_programma',
       ordine       INTEGER NOT NULL DEFAULT 0,
       immagine     TEXT,
+      adattamento_immagine TEXT NOT NULL DEFAULT 'cover',
       aggiornato_il TEXT NOT NULL
     );
   `);
 
-  // installazioni precedenti a data_iso/immagine: aggiunge le colonne se mancano
+  // installazioni precedenti a data_iso/immagine/adattamento_immagine: aggiunge
+  // le colonne se mancano, senza toccare i dati già presenti
   ensureColumn('eventi', 'data_iso', 'TEXT');
   ensureColumn('eventi', 'immagine', 'TEXT');
+  const adattamentoAppenaAggiunto = ensureColumn('eventi', 'adattamento_immagine', "TEXT NOT NULL DEFAULT 'cover'");
 
   backfillDateIsoIfMissing();
+  if (adattamentoAppenaAggiunto) backfillAdattamentoImmagineBarolo();
   seedEventiIfEmpty();
   persist();
 }
@@ -270,8 +288,8 @@ function createEvento(e) {
 
   const aggiornato_il = new Date().toISOString();
   db.run(
-    `INSERT INTO eventi (slug, titolo, sottotitolo, data_testo, data_iso, luogo, descrizione, stato, ordine, immagine, aggiornato_il)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO eventi (slug, titolo, sottotitolo, data_testo, data_iso, luogo, descrizione, stato, ordine, immagine, adattamento_immagine, aggiornato_il)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       slug,
       e.titolo || 'Nuovo appuntamento',
@@ -283,6 +301,7 @@ function createEvento(e) {
       e.stato === 'svolto' ? 'svolto' : 'in_programma',
       Number.isFinite(Number(e.ordine)) ? Number(e.ordine) : 0,
       e.immagine || '',
+      e.adattamento_immagine === 'contain' ? 'contain' : 'cover',
       aggiornato_il,
     ]
   );
@@ -290,7 +309,7 @@ function createEvento(e) {
   return getEvento(slug);
 }
 
-const EVENTO_CAMPI_MODIFICABILI = ['titolo', 'sottotitolo', 'data_testo', 'data_iso', 'luogo', 'descrizione', 'stato', 'ordine', 'immagine'];
+const EVENTO_CAMPI_MODIFICABILI = ['titolo', 'sottotitolo', 'data_testo', 'data_iso', 'luogo', 'descrizione', 'stato', 'ordine', 'immagine', 'adattamento_immagine'];
 
 function updateEvento(id, campi) {
   const esistente = getEvento(id);
@@ -301,7 +320,10 @@ function updateEvento(id, campi) {
   for (const campo of EVENTO_CAMPI_MODIFICABILI) {
     if (Object.prototype.hasOwnProperty.call(campi, campo)) {
       set.push(`${campo} = ?`);
-      params.push(campo === 'ordine' ? Number(campi[campo]) || 0 : campi[campo]);
+      let valore = campi[campo];
+      if (campo === 'ordine') valore = Number(valore) || 0;
+      if (campo === 'adattamento_immagine') valore = valore === 'contain' ? 'contain' : 'cover';
+      params.push(valore);
     }
   }
   if (!set.length) return esistente;
