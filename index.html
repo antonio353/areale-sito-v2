@@ -98,26 +98,32 @@
       <h2>Due eventi, un solo filo conduttore</h2>
       <a href="serate.html" class="section-link">Tutti gli appuntamenti</a>
     </div>
-    <div class="event-grid">
+    <!--
+      Questa griglia viene generata da js/eventi.js in base agli appuntamenti
+      con la casella "Mostra nella sezione 'Due eventi' della home" spuntata
+      nel pannello appuntamenti (admin-eventi.html): il contenuto qui sotto è
+      solo il segnaposto mostrato finché lo script non è ancora partito.
+    -->
+    <div class="event-grid" id="vetrina-grid">
       <article class="event-card">
         <div class="media">
-          <img src="img/eventi/barolo-barbaresco.jpg" alt="Locandina Barolo e Barbaresco vista mare, 2° edizione" class="img-contain" data-evento-img="barolo-barbaresco">
+          <img src="img/eventi/barolo-barbaresco.jpg" alt="Locandina Barolo e Barbaresco vista mare, 2° edizione" class="img-contain">
         </div>
         <div class="body">
-          <h3 data-evento="barolo-barbaresco:titolo">Barolo e Barbaresco vista mare</h3>
-          <p class="when" data-evento="barolo-barbaresco:sottotitolo">23 ottobre — Ristorante 116, Terracina</p>
+          <h3>Barolo e Barbaresco vista mare</h3>
+          <p class="when">23 ottobre — Ristorante 116, Terracina</p>
           <p>Il Piemonte incontra il litorale pontino: una degustazione guidata tra i due grandi rossi delle Langhe.</p>
           <a href="evento-barolo-barbaresco.html" class="btn btn-outline">Scopri l'evento</a>
         </div>
       </article>
       <article class="event-card">
         <div class="media">
-          <img src="https://images.unsplash.com/photo-1742665764542-aff4f4bc064e?auto=format&fit=crop&w=1200&q=80" alt="Trulli tradizionali di Alberobello, Puglia" data-evento-img="sud-wine-festival">
+          <img src="https://images.unsplash.com/photo-1742665764542-aff4f4bc064e?auto=format&fit=crop&w=1200&q=80" alt="Trulli tradizionali di Alberobello, Puglia">
         </div>
         <div class="body">
-          <h3 data-evento="sud-wine-festival:titolo">Sud Wine Festival</h3>
-          <p class="when" data-evento="sud-wine-festival:sottotitolo">Data in via di definizione</p>
-          <p data-evento="sud-wine-festival:descrizione">Un festival dedicato ai vitigni e ai produttori del Sud Italia: Campania, Puglia, Sicilia, Calabria e Basilicata in un solo evento.</p>
+          <h3>Sud Wine Festival</h3>
+          <p class="when">Data in via di definizione</p>
+          <p>Un festival dedicato ai vitigni e ai produttori del Sud Italia: Campania, Puglia, Sicilia, Calabria e Basilicata in un solo evento.</p>
           <a href="evento-sud-wine-festival.html" class="btn btn-outline">Scopri l'evento</a>
         </div>
       </article>
@@ -178,6 +184,6 @@
 </footer>
 
 <script src="js/main.js?v=5"></script>
-<script src="js/eventi.js?v=7"></script>
+<script src="js/eventi.js?v=8"></script>
 </body>
 </html>

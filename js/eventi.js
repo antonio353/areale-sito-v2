@@ -271,6 +271,41 @@
     );
   }
 
+  // --- home: sezione "Due eventi, un solo filo conduttore" ---
+  // mostra gli appuntamenti marcati "vetrina" dal pannello (nell'ordine
+  // impostato con il campo "Ordine"), al posto dei due fissi scritti a mano
+  function troncaTesto(s, max) {
+    var t = (s || '').trim();
+    return t.length > max ? t.slice(0, max - 1).trim() + '…' : t;
+  }
+
+  function vetrinaCardHtml(ev) {
+    var img = immagineDi(ev);
+    var containClass = ev.adattamento_immagine === 'contain' ? ' img-contain' : '';
+    var link = DEDICATED_PAGES[ev.slug] || ('evento-' + ev.slug + '.html');
+    return (
+      '<article class="event-card">' +
+      '<div class="media"><img class="' + containClass.trim() + '" src="' + img + '" alt="' + escHtml(ev.titolo) + '"></div>' +
+      '<div class="body">' +
+      '<h3>' + escHtml(ev.titolo) + '</h3>' +
+      '<p class="when">' + escHtml(ev.sottotitolo || ev.data_testo || '') + '</p>' +
+      '<p>' + escHtml(troncaTesto(testoSenzaTag(ev.descrizione), 170)) + '</p>' +
+      '<a href="' + link + '" class="btn btn-outline">Scopri l\'evento</a>' +
+      '</div>' +
+      '</article>'
+    );
+  }
+
+  function hydrateVetrina(eventi) {
+    var holder = document.getElementById('vetrina-grid');
+    if (!holder) return;
+    var scelti = eventi
+      .filter(function (e) { return !!e.vetrina; })
+      .sort(function (a, b) { return (a.ordine || 0) - (b.ordine || 0); });
+    if (!scelti.length) return; // nessuno impostato: resta il segnaposto nell'HTML
+    holder.innerHTML = scelti.map(vetrinaCardHtml).join('');
+  }
+
   function hydrateTimeline(eventi) {
     var progHolder = document.getElementById('timeline-in-programma');
     var svoltiHolder = document.getElementById('timeline-svolti');
@@ -300,6 +335,7 @@
         hydrateCampi(bySlug);
         hydrateProssimo(eventi);
         hydrateUltimo(eventi);
+        hydrateVetrina(eventi);
         hydrateTimeline(eventi);
         hydrateSelectPrenota(eventi);
       })

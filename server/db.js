@@ -60,6 +60,8 @@ function seedEventiIfEmpty() {
       ordine: 1,
       // la locandina è quadrata: "contain" la mostra intera invece di ritagliarla
       adattamento_immagine: 'contain',
+      // mostrato nella sezione "due eventi" della home
+      vetrina: 1,
     },
     {
       slug: 'sud-wine-festival',
@@ -71,6 +73,7 @@ function seedEventiIfEmpty() {
       descrizione: 'Un festival dedicato ai vitigni e ai produttori del Sud Italia: Campania, Puglia, Sicilia, Calabria e Basilicata in un solo evento.',
       stato: 'in_programma',
       ordine: 2,
+      vetrina: 1,
     },
     {
       slug: 'vini-dal-mondo',
@@ -127,6 +130,18 @@ function backfillAdattamentoImmagineBarolo() {
   if (ev) db.run("UPDATE eventi SET adattamento_immagine = 'contain' WHERE id = ?", [ev.id]);
 }
 
+// Al primo avvio dopo l'introduzione di "vetrina" (la sezione home "Due
+// eventi, un solo filo conduttore", prima fissa su questi due appuntamenti
+// scritti a mano nell'HTML): li marca come "in vetrina" una volta sola, così
+// la home resta identica a prima finché non si decide di cambiarli dal
+// pannello appuntamenti.
+function backfillVetrinaIniziale() {
+  ['barolo-barbaresco', 'sud-wine-festival'].forEach((slug) => {
+    const ev = getEvento(slug);
+    if (ev) db.run('UPDATE eventi SET vetrina = 1 WHERE id = ?', [ev.id]);
+  });
+}
+
 async function init() {
   const SQL = await initSqlJs({
     locateFile: (file) => path.join(__dirname, 'node_modules', 'sql.js', 'dist', file),
@@ -173,18 +188,21 @@ async function init() {
       ordine       INTEGER NOT NULL DEFAULT 0,
       immagine     TEXT,
       adattamento_immagine TEXT NOT NULL DEFAULT 'cover',
+      vetrina      INTEGER NOT NULL DEFAULT 0,
       aggiornato_il TEXT NOT NULL
     );
   `);
 
-  // installazioni precedenti a data_iso/immagine/adattamento_immagine: aggiunge
-  // le colonne se mancano, senza toccare i dati già presenti
+  // installazioni precedenti a data_iso/immagine/adattamento_immagine/vetrina:
+  // aggiunge le colonne se mancano, senza toccare i dati già presenti
   ensureColumn('eventi', 'data_iso', 'TEXT');
   ensureColumn('eventi', 'immagine', 'TEXT');
   const adattamentoAppenaAggiunto = ensureColumn('eventi', 'adattamento_immagine', "TEXT NOT NULL DEFAULT 'cover'");
+  const vetrinaAppenaAggiunta = ensureColumn('eventi', 'vetrina', 'INTEGER NOT NULL DEFAULT 0');
 
   backfillDateIsoIfMissing();
   if (adattamentoAppenaAggiunto) backfillAdattamentoImmagineBarolo();
+  if (vetrinaAppenaAggiunta) backfillVetrinaIniziale();
   seedEventiIfEmpty();
   persist();
 }
@@ -288,8 +306,8 @@ function createEvento(e) {
 
   const aggiornato_il = new Date().toISOString();
   db.run(
-    `INSERT INTO eventi (slug, titolo, sottotitolo, data_testo, data_iso, luogo, descrizione, stato, ordine, immagine, adattamento_immagine, aggiornato_il)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO eventi (slug, titolo, sottotitolo, data_testo, data_iso, luogo, descrizione, stato, ordine, immagine, adattamento_immagine, vetrina, aggiornato_il)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       slug,
       e.titolo || 'Nuovo appuntamento',
@@ -302,6 +320,7 @@ function createEvento(e) {
       Number.isFinite(Number(e.ordine)) ? Number(e.ordine) : 0,
       e.immagine || '',
       e.adattamento_immagine === 'contain' ? 'contain' : 'cover',
+      e.vetrina ? 1 : 0,
       aggiornato_il,
     ]
   );
@@ -309,7 +328,7 @@ function createEvento(e) {
   return getEvento(slug);
 }
 
-const EVENTO_CAMPI_MODIFICABILI = ['titolo', 'sottotitolo', 'data_testo', 'data_iso', 'luogo', 'descrizione', 'stato', 'ordine', 'immagine', 'adattamento_immagine'];
+const EVENTO_CAMPI_MODIFICABILI = ['titolo', 'sottotitolo', 'data_testo', 'data_iso', 'luogo', 'descrizione', 'stato', 'ordine', 'immagine', 'adattamento_immagine', 'vetrina'];
 
 function updateEvento(id, campi) {
   const esistente = getEvento(id);
@@ -323,6 +342,7 @@ function updateEvento(id, campi) {
       let valore = campi[campo];
       if (campo === 'ordine') valore = Number(valore) || 0;
       if (campo === 'adattamento_immagine') valore = valore === 'contain' ? 'contain' : 'cover';
+      if (campo === 'vetrina') valore = (valore === true || valore === 1 || valore === '1') ? 1 : 0;
       params.push(valore);
     }
   }

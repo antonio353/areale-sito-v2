@@ -147,6 +147,13 @@
           '</div>' +
           campoHtml('ordine-' + id, 'Ordine (i più bassi vengono prima)', ev.ordine, 'number') +
           '<div class="campo">' +
+            '<label for="vetrina-' + id + '">Home</label>' +
+            '<label class="checkline">' +
+              '<input type="checkbox" id="vetrina-' + id + '"' + (ev.vetrina ? ' checked' : '') + '>' +
+              '<span>Mostra nella sezione "Due eventi" della home</span>' +
+            '</label>' +
+          '</div>' +
+          '<div class="campo">' +
             '<label for="adatta-' + id + '">Adattamento immagine</label>' +
             '<select id="adatta-' + id + '">' +
               '<option value="cover"' + (ev.adattamento_immagine === 'contain' ? '' : ' selected') + '>Riempi il riquadro (ritaglia i bordi)</option>' +
@@ -187,6 +194,7 @@
       luogo: card.querySelector('#luogo-' + id).value.trim(),
       stato: card.querySelector('#stato-' + id).value,
       ordine: Number(card.querySelector('#ordine-' + id).value) || 0,
+      vetrina: card.querySelector('#vetrina-' + id).checked,
       adattamento_immagine: card.querySelector('#adatta-' + id).value,
       descrizione: leggiDescrizione('descrizione-' + id),
     };
@@ -291,6 +299,13 @@
           '</div>' +
           campoHtml('n-ordine', 'Ordine', 0, 'number') +
           '<div class="campo">' +
+            '<label for="n-vetrina">Home</label>' +
+            '<label class="checkline">' +
+              '<input type="checkbox" id="n-vetrina">' +
+              '<span>Mostra nella sezione "Due eventi" della home</span>' +
+            '</label>' +
+          '</div>' +
+          '<div class="campo">' +
             '<label for="n-adatta">Adattamento immagine</label>' +
             '<select id="n-adatta">' +
               '<option value="cover" selected>Riempi il riquadro (ritaglia i bordi)</option>' +
@@ -325,6 +340,7 @@
         luogo: document.getElementById('n-luogo').value.trim(),
         stato: document.getElementById('n-stato').value,
         ordine: Number(document.getElementById('n-ordine').value) || 0,
+        vetrina: document.getElementById('n-vetrina').checked,
         adattamento_immagine: document.getElementById('n-adatta').value,
         descrizione: leggiDescrizione('n-descrizione'),
       };

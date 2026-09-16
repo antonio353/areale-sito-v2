@@ -142,7 +142,7 @@ function eventoPageHtml(ev) {
 </footer>
 
 <script src="js/main.js?v=5"></script>
-<script src="js/eventi.js?v=7"></script>
+<script src="js/eventi.js?v=8"></script>
 </body>
 </html>
 `;
