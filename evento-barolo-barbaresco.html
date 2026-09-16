@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Archivo:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 
@@ -33,11 +33,11 @@
 </header>
 
 <section class="hero" style="min-height: 62vh;">
-  <img src="https://images.unsplash.com/photo-1662624335971-57960e9e669f?auto=format&fit=crop&w=2000&q=80" alt="Vigneto al tramonto a Barbaresco, Langhe" data-evento-img="barolo-barbaresco">
+  <img src="img/eventi/barolo-barbaresco.jpg" alt="Locandina Barolo e Barbaresco vista mare, 2° edizione" data-evento-img="barolo-barbaresco">
   <div class="hero-content">
     <span class="legend"><span class="dot"></span>Evento speciale</span>
     <h1 data-evento="barolo-barbaresco:titolo">Barolo e Barbaresco vista mare</h1>
-    <p class="lede" data-evento="barolo-barbaresco:sottotitolo">23 ottobre, ore 19:00 — Ristorante 116, Terracina</p>
+    <p class="lede" data-evento="barolo-barbaresco:sottotitolo">23 ottobre, ore 19:30 — Ristorante 116, Terracina</p>
     <div class="cta-row">
       <a href="prenota.html?evento=barolo-barbaresco" class="btn btn-primary">Prenota il tuo posto</a>
     </div>
@@ -65,27 +65,47 @@
 <section class="alt-bg">
   <div class="wrap">
     <div class="section-head">
-      <h2>Come si svolge l'appuntamento</h2>
+      <h2>Galleria</h2>
     </div>
-    <div class="timeline">
-      <div class="timeline-item">
-        <span class="date">19:00</span>
-        <div class="card">
-          <div><h3>Accoglienza</h3><p>Benvenuto in terrazza con il primo calice, mentre il sole cala sul mare.</p></div>
-        </div>
-      </div>
-      <div class="timeline-item">
-        <span class="date">19:30</span>
-        <div class="card">
-          <div><h3>Degustazione guidata</h3><p>Un percorso tra le etichette di Barolo e Barbaresco, con la guida di un sommelier dell'associazione: storia dei produttori, caratteristiche dell'areale, note di degustazione.</p></div>
-        </div>
-      </div>
-      <div class="timeline-item">
-        <span class="date">20:30</span>
-        <div class="card">
-          <div><h3>Cena vista mare</h3><p>Un menù studiato per accompagnare i vini in degustazione, servito in terrazza.</p></div>
-        </div>
-      </div>
+    <!--
+      GALLERIA: scorre in orizzontale (su desktop anche trascinando con il
+      mouse/trackpad, su mobile con lo swipe). Le foto qui sotto sono
+      segnaposto: sostituisci gli "src" con le foto vere della serata
+      (stessa cartella img/eventi, o un'altra a tua scelta) quando le avrai.
+      Per aggiungere una foto in più, copia un blocco <div class="gallery-item">...</div>.
+    -->
+    <div class="gallery-scroll">
+      <div class="gallery-item"><img src="img/eventi/barolo-barbaresco.jpg" alt="Locandina Barolo e Barbaresco vista mare"></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1775807346196-c12ab3c53d73?auto=format&fit=crop&w=900&q=80" alt="Tramonto sul mare visto dalla terrazza del Ristorante 116"></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1662624335971-57960e9e669f?auto=format&fit=crop&w=900&q=80" alt="Vigneto al tramonto a Barbaresco, Langhe"></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1676476623306-566a9b7afc44?auto=format&fit=crop&w=900&q=80" alt="Tavolo con calici durante una degustazione"></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1749217327112-b208e652e82e?auto=format&fit=crop&w=900&q=80" alt="Colline vitate delle Langhe a La Morra"></div>
+    </div>
+    <p class="gallery-hint">Foto della prima edizione e delle Langhe — verranno sostituite con gli scatti di questa serata.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Le aziende partecipanti</h2>
+    </div>
+    <!--
+      AZIENDE PARTECIPANTI: struttura pronta, da riempire con le cantine
+      confermate. Per ogni azienda: sostituisci "Nome Azienda" col nome
+      vero e, se vuoi il logo al posto dell'iniziale, cambia
+      <div class="logo-placeholder">N</div>
+      con
+      <img class="logo-placeholder" src="img/eventi/nome-file.png" alt="Logo Nome Azienda">
+      Per aggiungerne una, copia un blocco <div class="azienda">...</div>.
+    -->
+    <div class="aziende-grid">
+      <div class="azienda"><div class="logo-placeholder">A</div><span>Nome Azienda</span></div>
+      <div class="azienda"><div class="logo-placeholder">B</div><span>Nome Azienda</span></div>
+      <div class="azienda"><div class="logo-placeholder">C</div><span>Nome Azienda</span></div>
+      <div class="azienda"><div class="logo-placeholder">D</div><span>Nome Azienda</span></div>
+      <div class="azienda"><div class="logo-placeholder">E</div><span>Nome Azienda</span></div>
+      <div class="azienda"><div class="logo-placeholder">F</div><span>Nome Azienda</span></div>
     </div>
   </div>
 </section>
@@ -96,9 +116,9 @@
       <h2>Informazioni pratiche</h2>
     </div>
     <ul class="feature-meta" style="flex-direction:column; gap:14px; font-size:1.02rem;">
-      <li>Data: 23 ottobre, dalle 19:00</li>
+      <li>Data: 23 ottobre, dalle 19:30 alle 24:00</li>
       <li>Luogo: <span data-evento="barolo-barbaresco:luogo">Ristorante 116, Terracina</span></li>
-      <li>Quota di partecipazione: da confermare in fase di prenotazione</li>
+      <li>Quota di partecipazione: 50€</li>
       <li>Posti limitati: prenotazione consigliata con anticipo</li>
     </ul>
     <div class="cta-row" style="margin-top:2em;">
@@ -140,6 +160,6 @@
 </footer>
 
 <script src="js/main.js?v=3"></script>
-<script src="js/eventi.js?v=3"></script>
+<script src="js/eventi.js?v=4"></script>
 </body>
 </html>

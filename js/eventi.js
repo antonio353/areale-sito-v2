@@ -9,7 +9,7 @@
     'sud-wine-festival': 'evento-sud-wine-festival.html',
   };
   var IMMAGINI = {
-    'barolo-barbaresco': 'https://images.unsplash.com/photo-1662624335971-57960e9e669f?auto=format&fit=crop&w=900&q=80',
+    'barolo-barbaresco': 'img/eventi/barolo-barbaresco.jpg',
     'sud-wine-festival': 'https://images.unsplash.com/photo-1742665764542-aff4f4bc064e?auto=format&fit=crop&w=900&q=80',
     'vini-dal-mondo': 'https://images.unsplash.com/photo-1676476623306-566a9b7afc44?auto=format&fit=crop&w=900&q=80',
   };
