@@ -1,0 +1,17 @@
+# Componenti installate da npm: si reinstallano da sole (avvia-server.bat lo
+# fa in automatico), non vanno caricate su GitHub.
+server/node_modules/
+
+# Dati "vivi" del sito: database delle prenotazioni/appuntamenti e immagini
+# caricate dal pannello. Contengono dati reali (anche personali, es. le
+# prenotazioni) e vanno tenuti FUORI da GitHub — restano solo sul tuo PC
+# (e, quando il sito sarà online, sul disco persistente dell'hosting).
+storage/
+
+# Posizione precedente del database, prima della riorganizzazione in
+# "storage" — esclusa per sicurezza nel caso esista ancora sul tuo PC.
+server/data/
+
+# File di sistema
+.DS_Store
+Thumbs.db

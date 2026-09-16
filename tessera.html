@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diventa socio — Areale</title>
+<meta name="description" content="Richiedi la tessera dell'Associazione Culturale Areale.">
+<link rel="icon" href="img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Archivo:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css?v=4">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a href="index.html" class="brand">Areale <small>ASSOCIAZIONE&nbsp;CULTURALE</small></a>
+    <button class="nav-toggle" aria-label="Apri il menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="serate.html">Gli appuntamenti</a>
+      <a href="evento-barolo-barbaresco.html">Barolo &amp; Barbaresco</a>
+      <a href="evento-sud-wine-festival.html">Sud Wine Festival</a>
+      <a href="tessera.html" class="current">Diventa socio</a>
+      <div class="nav-cta">
+        <a href="prenota.html" class="btn btn-primary">Prenota un appuntamento</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="page-hero">
+  <div class="wrap">
+    <span class="legend petrol"><span class="dot"></span>Tesseramento</span>
+    <h1>Diventa socio di Areale</h1>
+    <p>Essere soci significa entrare a far parte di una comunità di appassionati e sostenere le attività dell'associazione durante tutto l'anno.</p>
+  </div>
+</div>
+
+<section class="tight">
+  <div class="wrap">
+    <div class="tier-grid single">
+      <div class="tier">
+        <h3>Socio Areale</h3>
+        <span class="price">Quota da confermare</span>
+        <ul>
+          <li>Accesso prioritario ai nostri appuntamenti di degustazione</li>
+          <li>Sconti presso i partner dell'associazione</li>
+          <li>Newsletter con calendario eventi</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt-bg">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Richiedi la tessera</h2>
+    </div>
+    <form class="form-card" name="tesseramento" method="POST" action="grazie.html" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="tesseramento">
+      <p class="visually-hidden"><label>Non compilare questo campo: <input name="bot-field"></label></p>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input id="nome" name="nome" type="text" autocomplete="given-name" required>
+        </div>
+        <div class="field">
+          <label for="cognome">Cognome</label>
+          <input id="cognome" name="cognome" type="text" autocomplete="family-name" required>
+        </div>
+
+        <div class="field">
+          <label for="nascita">Data di nascita</label>
+          <input id="nascita" name="data_nascita" type="date" required>
+        </div>
+        <div class="field">
+          <label for="cf">Codice fiscale</label>
+          <input id="cf" name="codice_fiscale" type="text" maxlength="16" autocomplete="off" required>
+        </div>
+
+        <div class="field full">
+          <label for="indirizzo">Indirizzo</label>
+          <input id="indirizzo" name="indirizzo" type="text" autocomplete="street-address" required>
+        </div>
+        <div class="field">
+          <label for="comune">Comune</label>
+          <input id="comune" name="comune" type="text" autocomplete="address-level2" required>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="telefono">Telefono</label>
+          <input id="telefono" name="telefono" type="tel" autocomplete="tel" required>
+        </div>
+
+        <div class="field full">
+          <label class="checkline">
+            <input type="checkbox" name="privacy" required>
+            <span>Ho letto <a href="privacy.html" target="_blank" rel="noopener">l'informativa sul trattamento dei dati personali</a> e acconsento al loro utilizzo per la gestione del tesseramento.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-foot">
+        <button type="submit" class="btn btn-petrol">Invia la richiesta di tesseramento</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <p class="brand">Areale</p>
+        <p>Associazione Culturale — Terracina (LT)<br>Degustazioni, eventi e cultura del vino.</p>
+      </div>
+      <div>
+        <h4>Il sito</h4>
+        <ul>
+          <li><a href="serate.html">Gli appuntamenti</a></li>
+          <li><a href="prenota.html">Prenota</a></li>
+          <li><a href="tessera.html">Diventa socio</a></li>
+          <li><a href="privacy.html">Informativa privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Eventi speciali</h4>
+        <ul>
+          <li><a href="evento-barolo-barbaresco.html">Barolo &amp; Barbaresco vista mare</a></li>
+          <li><a href="evento-sud-wine-festival.html">Sud Wine Festival</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Associazione Culturale Areale — Terracina</span>
+      <span><a href="mailto:associazioneareale@gmail.com">associazioneareale@gmail.com</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js?v=3"></script>
+</body>
+</html>

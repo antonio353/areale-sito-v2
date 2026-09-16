@@ -1,0 +1,158 @@
+AREALE — sito web + pannello prenotazioni
+==========================================
+
+COME LANCIARLO IN LOCALE
+1. Fai doppio click su "avvia-server.bat".
+2. La prima volta installa in automatico le componenti del server (richiede
+   una connessione a internet, dura una decina di secondi). Le volte
+   successive parte subito.
+3. Si apre il browser su http://localhost:3000/ — il sito vero e proprio.
+4. Per fermare il server: torna sulla finestra nera e premi CTRL+C, oppure
+   chiudila.
+
+IMPORTANTE: da questa versione il sito richiede Node.js (non più solo
+Python). Se non lo hai, scaricalo da https://nodejs.org/ (versione LTS,
+va bene quella consigliata) e installalo: è un pacchetto normale, come
+qualsiasi altro programma.
+
+NOTA: al primo avvio dopo questo aggiornamento, "avvia-server.bat" scarica
+un nuovo componente (serve per caricare le immagini degli appuntamenti):
+serve una connessione a internet, dura pochi secondi in più del solito.
+
+
+IL PANNELLO DI GESTIONE PRENOTAZIONI
+Vai su http://localhost:3000/admin.html (link comodo anche dalla console
+che si apre). Ti verrà chiesto un nome utente e una password:
+
+  Utente:   admin
+  Password: areale2026
+
+Da lì puoi vedere tutte le prenotazioni arrivate dal modulo "Prenota una
+serata" del sito, filtrarle per evento o stato, segnarle come confermate
+o annullate, eliminarle, ed esportarle in CSV (apribile con Excel) per
+tenerne una copia o condividerle.
+
+Per cambiare utente/password: apri il file server\server.js con un
+editor di testo (anche il Blocco Note va bene), cerca le righe segnate
+con "MODIFICA QUI" vicino all'inizio del file, e cambia i valori tra
+virgolette. Salva e riavvia il server.
+
+
+IL PANNELLO DI GESTIONE APPUNTAMENTI (novità)
+Vai su http://localhost:3000/admin-eventi.html (trovi il link anche nel
+menu in alto del pannello prenotazioni, e nella console del server).
+Stessa utente/password del pannello prenotazioni:
+
+  Utente:   admin
+  Password: areale2026
+
+Da lì puoi modificare, per ogni appuntamento già pubblicato: titolo,
+sottotitolo, data mostrata sul sito (testo libero, es. "23 ottobre"),
+data reale (per ordinare gli appuntamenti — vedi sotto), luogo,
+descrizione, stato (in programma / svolto), ordine di visualizzazione e
+l'immagine di presentazione. Le modifiche si vedono subito sul sito
+pubblico (home, elenco appuntamenti, pagina dedicata), senza bisogno di
+toccare il codice.
+
+Puoi anche creare nuovi appuntamenti da zero con "+ Nuovo appuntamento",
+o eliminarne uno con "Elimina appuntamento" (l'eliminazione è
+definitiva, te lo chiede prima di conferma).
+
+OGNI APPUNTAMENTO HA UNA PAGINA DEDICATA
+Quando crei un nuovo appuntamento dal pannello, il sito gli genera subito
+una pagina tutta sua (lo stesso indirizzo che avrebbe una pagina scritta
+a mano: evento-<nome-appuntamento>.html), raggiungibile dal pulsante
+"Scopri l'evento" nell'elenco appuntamenti. Barolo & Barbaresco e Sud
+Wine Festival restano invece le due pagine curate a mano, con i loro
+contenuti extra (il programma della serata, il modulo "Ricevi un
+avviso"), e restano gli unici due collegati nel menu in alto del sito.
+
+L'IMMAGINE DI PRESENTAZIONE
+Nel pannello, sotto ogni appuntamento (e anche quando ne crei uno nuovo),
+trovi "Immagine di presentazione": scegli un file dal tuo PC e premi
+"Carica immagine". Diventa la foto principale di quell'appuntamento
+ovunque compaia sul sito (pagina dedicata, elenco, ed eventualmente il
+riquadro "Prossimo appuntamento" in home). Se non carichi nulla, resta
+una foto generica di riserva.
+
+"PROSSIMO APPUNTAMENTO" IN HOME: ORA È AUTOMATICO
+Il riquadro "Prossimo appuntamento" in home non è più fisso su Barolo &
+Barbaresco: mostra sempre l'appuntamento "in programma" con la data più
+vicina a oggi, calcolata dal campo "Data (per ordinare)" del pannello —
+per questo è importante compilarlo (formato calendario, non il testo
+libero) per ogni appuntamento futuro. Se nessun appuntamento ha questa
+data impostata, il riquadro resta su quello con "Ordine" più basso, come
+prima.
+Il riquadro "Ultimo appuntamento svolto" invece resta agganciato a Vini
+dal Mondo (non l'hai chiesto di renderlo automatico anche quello — se
+vuoi lo stesso comportamento anche lì, fammelo sapere).
+
+Da sapere, per usarlo bene:
+- Un nuovo appuntamento non compare automaticamente tra i pulsanti del
+  menu in alto né tra le due "card" in evidenza della home page (quelle
+  restano riservate a Barolo & Barbaresco e Sud Wine Festival) — ma ha
+  la sua pagina dedicata, compare nell'elenco completo (serate.html) e
+  può diventare "prossimo appuntamento" in home se la sua data è la più
+  vicina.
+- Se il server non è avviato, le pagine del sito mostrano comunque il
+  testo scritto in origine (nulla si rompe): il pannello serve solo
+  quando il server è acceso.
+
+
+COME FUNZIONA (in breve)
+Prima il sito era completamente statico (solo pagine HTML) e il modulo di
+prenotazione si appoggiava a Netlify Forms, che però funziona solo se il
+sito è pubblicato su Netlify — in locale dava errore.
+
+Ora c'è un piccolo server (cartella "server") scritto in Node.js che:
+- continua a servire tutte le pagine del sito come prima
+- riceve le prenotazioni inviate dal modulo di prenota.html e le salva in
+  un database SQLite vero e proprio (file storage\data\areale.sqlite,
+  creato automaticamente al primo avvio — NON cancellare la cartella
+  "storage" se vuoi tenere lo storico delle prenotazioni e degli
+  appuntamenti: è l'UNICA cartella che contiene dati "vivi" del sito)
+- nello stesso database tiene anche titolo/sottotitolo/data/luogo/
+  descrizione/immagine di ogni appuntamento, modificabili dal pannello
+  eventi (le immagini caricate vengono salvate in storage\img\eventi,
+  creata automaticamente, ma restano visibili sul sito allo stesso
+  indirizzo di sempre)
+- genera al volo la pagina dedicata di ogni appuntamento creato dal
+  pannello (le due pagine speciali scritte a mano restano quelle)
+- mostra questi dati nei due pannelli di gestione (admin.html e
+  admin-eventi.html), entrambi protetti da login
+
+NOTA SULLA CARTELLA "storage" (novità)
+Database e immagini caricate sono stati riuniti in un'unica cartella,
+"storage", accanto alla cartella "server". Il motivo: è più facile da
+backuppare (basta copiare quella cartella) ed è pronta per quando il
+sito andrà online su un hosting come Render, dove serve indicare
+un'unica cartella da tenere "persistente" tra un aggiornamento e l'altro.
+Se il tuo PC aveva già dati nelle vecchie posizioni (server\data e
+img\eventi), il server li sposta da solo al primo avvio con questa
+versione: non devi fare nulla, e nulla va perso. Le vecchie cartelle,
+per sicurezza, non vengono cancellate automaticamente: puoi controllare
+che sia andato tutto bene e poi eliminarle tu quando vuoi.
+
+Ho aggiornato SOLO il modulo di prenotazione (prenota.html), perché è
+quello che mi hai chiesto di gestire. I moduli di "Diventa socio"
+(tessera.html) e "Ricevi un avviso" del Sud Wine Festival restano legati
+a Netlify Forms come prima: in locale non salvano da nessuna parte
+(danno lo stesso errore di prima), funzionano solo una volta pubblicato
+il sito su Netlify. Se vuoi, posso portare anche questi due nello stesso
+database — basta chiedermelo.
+
+
+UNA COSA DA SAPERE PRIMA DI METTERLO ONLINE
+Questo server (con il suo database SQLite su file) è pensato per girare
+in locale sul tuo PC, oppure su un hosting che tenga un processo Node.js
+sempre acceso (es. Render, Railway, un piccolo VPS). NON funziona se
+pubblichi il sito su Netlify da solo, perché Netlify serve solo file
+statici e non tiene un server Node con database persistente. Quando sarai
+pronto a mettere il sito online in modo definitivo, fammi sapere che
+tipo di hosting hai in mente e ti aiuto a impostarlo di conseguenza.
+
+
+ALTRI SUGGERIMENTI (dalla verifica iniziale, ancora validi)
+- Le immagini sono tutte prese da Unsplash (foto stock, non foto reali
+  delle vostre serate). Prima di andare online converrebbe sostituirle
+  con foto vostre, quando le avrete.

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sud Wine Festival — Areale</title>
+<meta name="description" content="Sud Wine Festival: il festival di Areale dedicato ai produttori e ai vitigni del Sud Italia.">
+<link rel="icon" href="img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Archivo:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css?v=4">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a href="index.html" class="brand">Areale <small>ASSOCIAZIONE&nbsp;CULTURALE</small></a>
+    <button class="nav-toggle" aria-label="Apri il menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="serate.html">Gli appuntamenti</a>
+      <a href="evento-barolo-barbaresco.html">Barolo &amp; Barbaresco</a>
+      <a href="evento-sud-wine-festival.html" class="current">Sud Wine Festival</a>
+      <a href="tessera.html">Diventa socio</a>
+      <div class="nav-cta">
+        <a href="prenota.html" class="btn btn-primary">Prenota un appuntamento</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" style="min-height: 62vh;">
+  <img src="https://images.unsplash.com/photo-1742665764542-aff4f4bc064e?auto=format&fit=crop&w=2000&q=80" alt="Trulli tradizionali di Alberobello, Puglia" data-evento-img="sud-wine-festival">
+  <div class="hero-content">
+    <span class="legend"><span class="dot"></span>Evento speciale</span>
+    <h1 data-evento="sud-wine-festival:titolo">Sud Wine Festival</h1>
+    <p class="lede" data-evento="sud-wine-festival:sottotitolo">Data in via di definizione — Terracina</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="feature-row">
+      <div class="prose-wide">
+        <span class="legend"><span class="dot"></span>Il concept</span>
+        <h2>Il Sud Italia, areale per areale</h2>
+        <div data-evento="sud-wine-festival:descrizione" data-evento-rich>
+          <p>Dalla Campania alla Sicilia, passando per Puglia, Calabria e Basilicata: il Sud Italia raccoglie alcuni degli areali vitivinicoli più antichi e sorprendenti del paese. Il Sud Wine Festival nasce per raccontarli in un solo evento, con produttori, degustazioni guidate e abbinamenti gastronomici del territorio.</p>
+          <p>Stiamo definendo data, sede e produttori partecipanti. Lascia il tuo contatto qui sotto: sarai tra i primi a sapere quando apriranno le prenotazioni.</p>
+        </div>
+      </div>
+      <div class="feature-media">
+        <img src="https://images.unsplash.com/photo-1676476623306-566a9b7afc44?auto=format&fit=crop&w=1200&q=80" alt="Tavolo con calici da degustazione">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt-bg">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Ricevi un avviso</h2>
+    </div>
+    <form class="form-card" style="max-width:640px;" name="interesse-festival" method="POST" action="grazie.html" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="interesse-festival">
+      <p class="visually-hidden"><label>Non compilare questo campo: <input name="bot-field"></label></p>
+      <div class="form-grid">
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input id="nome" name="nome" type="text" autocomplete="given-name" required>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+        </div>
+      </div>
+      <div class="form-foot">
+        <button type="submit" class="btn btn-primary">Avvisatemi quando ci sono le date</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <p class="brand">Areale</p>
+        <p>Associazione Culturale — Terracina (LT)<br>Degustazioni, eventi e cultura del vino.</p>
+      </div>
+      <div>
+        <h4>Il sito</h4>
+        <ul>
+          <li><a href="serate.html">Gli appuntamenti</a></li>
+          <li><a href="prenota.html">Prenota</a></li>
+          <li><a href="tessera.html">Diventa socio</a></li>
+          <li><a href="privacy.html">Informativa privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Eventi speciali</h4>
+        <ul>
+          <li><a href="evento-barolo-barbaresco.html">Barolo &amp; Barbaresco vista mare</a></li>
+          <li><a href="evento-sud-wine-festival.html">Sud Wine Festival</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Associazione Culturale Areale — Terracina</span>
+      <span><a href="mailto:associazioneareale@gmail.com">associazioneareale@gmail.com</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js?v=3"></script>
+<script src="js/eventi.js?v=3"></script>
+</body>
+</html>

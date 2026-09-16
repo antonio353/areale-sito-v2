@@ -1,0 +1,19 @@
+{
+  "name": "areale-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Server locale per il sito Areale: serve le pagine statiche, riceve le prenotazioni e offre un pannello di gestione.",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-basic-auth": "^1.2.1",
+    "multer": "^2.4.0",
+    "sql.js": "^1.11.0"
+  }
+}
