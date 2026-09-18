@@ -353,13 +353,33 @@
     holder.innerHTML = ordinati.map(eventoCardHtml).join('');
   }
 
+  // ordina una lista di eventi per data (data_iso): quelli con una data
+  // valida per primi, in ordine cronologico (crescente o decrescente a
+  // seconda di "piuRecentePrima"); quelli senza data ancora impostata restano
+  // in coda, nell'ordine manuale (campo "ordine")
+  function ordinaPerData(lista, piuRecentePrima) {
+    var conData = lista
+      .map(function (e) { return { e: e, d: dataIsoValida(e.data_iso) }; })
+      .filter(function (x) { return x.d; })
+      .sort(function (a, b) { return piuRecentePrima ? b.d - a.d : a.d - b.d; })
+      .map(function (x) { return x.e; });
+    var senzaData = lista
+      .filter(function (e) { return !dataIsoValida(e.data_iso); })
+      .sort(function (a, b) { return (a.ordine || 0) - (b.ordine || 0); });
+    return conData.concat(senzaData);
+  }
+
   function hydrateTimeline(eventi) {
     var progHolder = document.getElementById('timeline-in-programma');
     var svoltiHolder = document.getElementById('timeline-svolti');
     if (!progHolder && !svoltiHolder) return;
 
-    var inProgramma = eventi.filter(function (e) { return e.stato === 'in_programma'; });
-    var svolti = eventi.filter(function (e) { return e.stato === 'svolto'; });
+    // in programma: dal più vicino nel tempo; svolti: dal più recente —
+    // prima venivano mostrati nell'ordine restituito dal database (senza
+    // tener conto della data), per questo un appuntamento più vicino nel
+    // tempo poteva comparire dopo uno più lontano
+    var inProgramma = ordinaPerData(eventi.filter(function (e) { return e.stato === 'in_programma'; }), false);
+    var svolti = ordinaPerData(eventi.filter(function (e) { return e.stato === 'svolto'; }), true);
 
     if (progHolder) {
       progHolder.innerHTML = inProgramma.length

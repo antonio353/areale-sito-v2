@@ -66,7 +66,11 @@
   .img-upload-controls{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .img-upload-controls input[type="file"]{ font-size:0.82rem; max-width:220px; }
 
-  .evento-actions .btn-ghost{ padding:0.5em 0; margin-right:14px; }
+  /* pulsanti secondari del pannello (Duplica, Carica immagine): stesso stile
+     "btn-outline" dei pulsanti del sito, ma più compatti per stare bene
+     dentro le schede appuntamento */
+  .evento-card .btn-outline{ padding:0.55em 1.2em; font-size:0.85rem; }
+  .evento-actions .btn-outline{ margin-right:10px; }
   .admin-bottom-add{ margin-top:8px; text-align:center; }
 </style>
 </head>
@@ -104,6 +108,6 @@
   <div id="nuovo-holder-bottom"></div>
 </div>
 
-<script src="admin-eventi.js?v=6"></script>
+<script src="admin-eventi.js?v=7"></script>
 </body>
 </html>

@@ -171,7 +171,7 @@
               immaginePreviewHtml(ev) +
               '<div class="img-upload-controls">' +
                 '<input type="file" accept="image/*" id="imgfile-' + id + '">' +
-                '<button type="button" class="btn-ghost" data-action="carica-immagine">Carica immagine</button>' +
+                '<button type="button" class="btn btn-outline" data-action="carica-immagine">Carica immagine</button>' +
                 '<span class="salvato-msg" data-role="img-salvato">Immagine aggiornata ✓</span>' +
               '</div>' +
             '</div>' +
@@ -183,7 +183,7 @@
             '<span class="salvato-msg" data-role="salvato">Salvato ✓</span>' +
           '</div>' +
           '<div>' +
-            '<button type="button" class="btn-ghost" data-action="duplica">Duplica appuntamento</button>' +
+            '<button type="button" class="btn btn-outline" data-action="duplica">Duplica appuntamento</button> ' +
             '<button type="button" class="btn-del" data-action="elimina">Elimina appuntamento</button>' +
           '</div>' +
         '</div>' +
