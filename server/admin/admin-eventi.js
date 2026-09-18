@@ -138,6 +138,7 @@
           campoHtml('data-' + id, 'Data (testo mostrato sul sito, es. "23 ottobre")', ev.data_testo) +
           campoHtml('dataiso-' + id, 'Data (per ordinare — usata per "prossimo appuntamento")', ev.data_iso, 'date') +
           campoHtml('luogo-' + id, 'Luogo', ev.luogo) +
+          campoHtml('dettaglio-' + id, 'Dettaglio (terza riga sulla home, es. "26 produttori presenti" o "Degustazione guidata + cena")', ev.dettaglio) +
           '<div class="campo">' +
             '<label for="stato-' + id + '">Stato</label>' +
             '<select id="stato-' + id + '">' +
@@ -185,6 +186,7 @@
       data_testo: card.querySelector('#data-' + id).value.trim(),
       data_iso: card.querySelector('#dataiso-' + id).value,
       luogo: card.querySelector('#luogo-' + id).value.trim(),
+      dettaglio: card.querySelector('#dettaglio-' + id).value.trim(),
       stato: card.querySelector('#stato-' + id).value,
       ordine: Number(card.querySelector('#ordine-' + id).value) || 0,
       adattamento_immagine: card.querySelector('#adatta-' + id).value,
@@ -282,6 +284,7 @@
           campoHtml('n-data', 'Data (testo mostrato sul sito, es. "23 ottobre")') +
           campoHtml('n-dataiso', 'Data (per ordinare — usata per "prossimo appuntamento")', '', 'date') +
           campoHtml('n-luogo', 'Luogo') +
+          campoHtml('n-dettaglio', 'Dettaglio (terza riga sulla home, es. "26 produttori presenti" o "Degustazione guidata + cena")') +
           '<div class="campo">' +
             '<label for="n-stato">Stato</label>' +
             '<select id="n-stato">' +
@@ -323,6 +326,7 @@
         data_testo: document.getElementById('n-data').value.trim(),
         data_iso: document.getElementById('n-dataiso').value,
         luogo: document.getElementById('n-luogo').value.trim(),
+        dettaglio: document.getElementById('n-dettaglio').value.trim(),
         stato: document.getElementById('n-stato').value,
         ordine: Number(document.getElementById('n-ordine').value) || 0,
         adattamento_immagine: document.getElementById('n-adatta').value,

@@ -58,6 +58,7 @@ function seedEventiIfEmpty() {
       descrizione: "Due grandi Nebbiolo del Piemonte, Barolo e Barbaresco, in un unico appuntamento affacciato sul mare di Terracina. Un percorso guidato tra etichette, produttori e un menù pensato per accompagnare ogni calice.",
       stato: 'in_programma',
       ordine: 1,
+      dettaglio: 'Degustazione guidata + cena',
       // la locandina è quadrata: "contain" la mostra intera invece di ritagliarla
       adattamento_immagine: 'contain',
     },
@@ -82,6 +83,7 @@ function seedEventiIfEmpty() {
       descrizione: "Un appuntamento dedicato ai vini da ogni angolo del mondo, con 26 produttori a raccontare le proprie etichette calice dopo calice. Grazie a chi c'era: la prossima è già in programma.",
       stato: 'svolto',
       ordine: 1,
+      dettaglio: '26 produttori presenti',
     },
   ];
 
@@ -125,6 +127,25 @@ function backfillDateIsoIfMissing() {
 function backfillAdattamentoImmagineBarolo() {
   const ev = getEvento('barolo-barbaresco');
   if (ev) db.run("UPDATE eventi SET adattamento_immagine = 'contain' WHERE id = ?", [ev.id]);
+}
+
+// Al primo avvio dopo l'introduzione di "dettaglio" (terza riga nei riquadri
+// "prossimo"/"ultimo appuntamento" della home, es. "26 produttori presenti" o
+// "Degustazione guidata + cena"): valorizza quella dei due appuntamenti di
+// esempio che già avevano quel testo scritto a mano nell'HTML, così non
+// sparisce nulla al primo avvio con questa versione. Per i nuovi appuntamenti
+// creati dopo, va scritta dal pannello.
+function backfillDettaglioIniziale() {
+  const note = {
+    'barolo-barbaresco': 'Degustazione guidata + cena',
+    'vini-dal-mondo': '26 produttori presenti',
+  };
+  Object.keys(note).forEach((slug) => {
+    const ev = getEvento(slug);
+    if (ev && !ev.dettaglio) {
+      db.run('UPDATE eventi SET dettaglio = ? WHERE id = ?', [note[slug], ev.id]);
+    }
+  });
 }
 
 // NOTA: un campo "vetrina" (spunta manuale per la sezione home "due eventi")
@@ -179,18 +200,21 @@ async function init() {
       ordine       INTEGER NOT NULL DEFAULT 0,
       immagine     TEXT,
       adattamento_immagine TEXT NOT NULL DEFAULT 'cover',
+      dettaglio    TEXT NOT NULL DEFAULT '',
       aggiornato_il TEXT NOT NULL
     );
   `);
 
-  // installazioni precedenti a data_iso/immagine/adattamento_immagine: aggiunge
-  // le colonne se mancano, senza toccare i dati già presenti
+  // installazioni precedenti a data_iso/immagine/adattamento_immagine/dettaglio:
+  // aggiunge le colonne se mancano, senza toccare i dati già presenti
   ensureColumn('eventi', 'data_iso', 'TEXT');
   ensureColumn('eventi', 'immagine', 'TEXT');
   const adattamentoAppenaAggiunto = ensureColumn('eventi', 'adattamento_immagine', "TEXT NOT NULL DEFAULT 'cover'");
+  const dettaglioAppenaAggiunto = ensureColumn('eventi', 'dettaglio', "TEXT NOT NULL DEFAULT ''");
 
   backfillDateIsoIfMissing();
   if (adattamentoAppenaAggiunto) backfillAdattamentoImmagineBarolo();
+  if (dettaglioAppenaAggiunto) backfillDettaglioIniziale();
   seedEventiIfEmpty();
   persist();
 }
@@ -294,8 +318,8 @@ function createEvento(e) {
 
   const aggiornato_il = new Date().toISOString();
   db.run(
-    `INSERT INTO eventi (slug, titolo, sottotitolo, data_testo, data_iso, luogo, descrizione, stato, ordine, immagine, adattamento_immagine, aggiornato_il)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO eventi (slug, titolo, sottotitolo, data_testo, data_iso, luogo, descrizione, stato, ordine, immagine, adattamento_immagine, dettaglio, aggiornato_il)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       slug,
       e.titolo || 'Nuovo appuntamento',
@@ -308,6 +332,7 @@ function createEvento(e) {
       Number.isFinite(Number(e.ordine)) ? Number(e.ordine) : 0,
       e.immagine || '',
       e.adattamento_immagine === 'contain' ? 'contain' : 'cover',
+      e.dettaglio || '',
       aggiornato_il,
     ]
   );
@@ -315,7 +340,7 @@ function createEvento(e) {
   return getEvento(slug);
 }
 
-const EVENTO_CAMPI_MODIFICABILI = ['titolo', 'sottotitolo', 'data_testo', 'data_iso', 'luogo', 'descrizione', 'stato', 'ordine', 'immagine', 'adattamento_immagine'];
+const EVENTO_CAMPI_MODIFICABILI = ['titolo', 'sottotitolo', 'data_testo', 'data_iso', 'luogo', 'descrizione', 'stato', 'ordine', 'immagine', 'adattamento_immagine', 'dettaglio'];
 
 function updateEvento(id, campi) {
   const esistente = getEvento(id);
