@@ -165,6 +165,13 @@
     sezione.querySelectorAll('[data-prossimo]').forEach(function (el) {
       var campo = el.getAttribute('data-prossimo');
       var valore = ev[campo];
+      // "dettaglio" è un campo facoltativo: se è stato svuotato dal pannello
+      // va nascosto (non deve restare il vecchio testo scritto nell'HTML)
+      if (campo === 'dettaglio') {
+        el.style.display = valore ? '' : 'none';
+        if (valore) el.textContent = valore;
+        return;
+      }
       if (valore == null || valore === '') return;
       if (campo === 'descrizione') {
         el.innerHTML = formattoInline(valore);
@@ -210,6 +217,13 @@
     sezione.querySelectorAll('[data-ultimo]').forEach(function (el) {
       var campo = el.getAttribute('data-ultimo');
       var valore = ev[campo];
+      // "dettaglio" è un campo facoltativo: se è stato svuotato dal pannello
+      // va nascosto (non deve restare il vecchio testo scritto nell'HTML)
+      if (campo === 'dettaglio') {
+        el.style.display = valore ? '' : 'none';
+        if (valore) el.textContent = valore;
+        return;
+      }
       if (valore == null || valore === '') return;
       if (campo === 'descrizione') {
         el.innerHTML = formattoInline(valore);
