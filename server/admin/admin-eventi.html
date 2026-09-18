@@ -65,6 +65,9 @@
   }
   .img-upload-controls{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .img-upload-controls input[type="file"]{ font-size:0.82rem; max-width:220px; }
+
+  .evento-actions .btn-ghost{ padding:0.5em 0; margin-right:14px; }
+  .admin-bottom-add{ margin-top:8px; text-align:center; }
 </style>
 </head>
 <body>
@@ -94,8 +97,13 @@
   <div id="lista-holder">
     <p class="empty-state">Caricamento…</p>
   </div>
+
+  <div class="admin-bottom-add">
+    <button type="button" class="btn btn-primary" id="btn-nuovo-bottom">+ Nuovo appuntamento</button>
+  </div>
+  <div id="nuovo-holder-bottom"></div>
 </div>
 
-<script src="admin-eventi.js?v=5"></script>
+<script src="admin-eventi.js?v=6"></script>
 </body>
 </html>

@@ -4,7 +4,17 @@
 (function () {
   var listaHolder = document.getElementById('lista-holder');
   var nuovoHolder = document.getElementById('nuovo-holder');
+  var nuovoHolderBottom = document.getElementById('nuovo-holder-bottom');
   var btnNuovo = document.getElementById('btn-nuovo');
+  var btnNuovoBottom = document.getElementById('btn-nuovo-bottom');
+  // tutti i punti in cui può comparire il form "nuovo appuntamento" (in cima
+  // e in fondo al pannello): tenuti qui per poter chiudere l'uno quando si
+  // apre l'altro, evitando due form aperti insieme
+  var HOLDER_NUOVI = [nuovoHolder, nuovoHolderBottom].filter(Boolean);
+
+  // dati completi dell'ultimo elenco caricato, tenuti in memoria per poter
+  // duplicare un appuntamento senza dover rifare una richiesta al server
+  var eventiPerId = {};
 
   function campoHtml(id, label, value, type) {
     type = type || 'text';
@@ -172,7 +182,10 @@
             '<button type="button" class="btn btn-primary" data-action="salva">Salva modifiche</button> ' +
             '<span class="salvato-msg" data-role="salvato">Salvato ✓</span>' +
           '</div>' +
-          '<button type="button" class="btn-del" data-action="elimina">Elimina appuntamento</button>' +
+          '<div>' +
+            '<button type="button" class="btn-ghost" data-action="duplica">Duplica appuntamento</button>' +
+            '<button type="button" class="btn-del" data-action="elimina">Elimina appuntamento</button>' +
+          '</div>' +
         '</div>' +
       '</div>'
     );
@@ -215,6 +228,37 @@
           setTimeout(function () { msg.classList.remove('show'); }, 1800);
         })
         .catch(function () { alert('Non sono riuscito a salvare le modifiche. Riprova.'); });
+    });
+
+    card.querySelector('[data-action="duplica"]').addEventListener('click', function () {
+      var ev = eventiPerId[id];
+      if (!ev) return;
+      var btnDup = card.querySelector('[data-action="duplica"]');
+      var payload = {
+        titolo: (ev.titolo || 'Appuntamento') + ' (copia)',
+        sottotitolo: ev.sottotitolo || '',
+        data_testo: ev.data_testo || '',
+        data_iso: ev.data_iso || '',
+        luogo: ev.luogo || '',
+        dettaglio: ev.dettaglio || '',
+        stato: ev.stato === 'svolto' ? 'svolto' : 'in_programma',
+        ordine: ev.ordine || 0,
+        adattamento_immagine: ev.adattamento_immagine || 'cover',
+        descrizione: ev.descrizione || '',
+        immagine: ev.immagine || '', // stessa immagine dell'originale: nessun nuovo caricamento necessario
+      };
+      btnDup.disabled = true;
+      fetch('/api/eventi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+        .then(function () { carica(); })
+        .catch(function () {
+          alert('Non sono riuscito a duplicare l\'appuntamento. Riprova.');
+          btnDup.disabled = false;
+        });
     });
 
     card.querySelector('[data-action="elimina"]').addEventListener('click', function () {
@@ -260,6 +304,8 @@
     fetch('/api/eventi')
       .then(function (r) { return r.json(); })
       .then(function (eventi) {
+        eventiPerId = {};
+        eventi.forEach(function (e) { eventiPerId[e.id] = e; });
         if (!eventi.length) {
           listaHolder.innerHTML = '<p class="empty-state">Nessun appuntamento ancora. Creane uno con "+ Nuovo appuntamento".</p>';
           return;
@@ -272,9 +318,18 @@
       });
   }
 
-  function mostraFormNuovo() {
-    if (nuovoHolder.querySelector('.nuovo-card')) return; // già aperto
-    nuovoHolder.innerHTML =
+  // chiude il form "nuovo appuntamento", ovunque sia aperto (in cima o in
+  // fondo al pannello)
+  function chiudiFormNuovo() {
+    HOLDER_NUOVI.forEach(function (h) { h.innerHTML = ''; });
+  }
+
+  // il form può essere aperto sia dal pulsante in cima sia da quello in
+  // fondo al pannello: "holder" è il contenitore in cui va inserito
+  function mostraFormNuovo(holder) {
+    if (holder.querySelector('.nuovo-card')) return; // già aperto qui
+    chiudiFormNuovo(); // non lasciarne aperto un altro nel frattempo
+    holder.innerHTML =
       '<div class="evento-card nuovo-card">' +
         '<div class="evento-card-head"><strong>Nuovo appuntamento</strong></div>' +
         '<p class="form-note" style="margin-top:0;">Riceverà subito una sua pagina dedicata sul sito (link "Scopri l\'evento" nell\'elenco appuntamenti).</p>' +
@@ -312,27 +367,27 @@
         '</div>' +
       '</div>';
 
-    attaccaRte(nuovoHolder);
+    attaccaRte(holder);
 
-    document.getElementById('n-annulla').addEventListener('click', function () {
-      nuovoHolder.innerHTML = '';
+    holder.querySelector('#n-annulla').addEventListener('click', function () {
+      chiudiFormNuovo();
     });
-    document.getElementById('n-salva').addEventListener('click', function () {
-      var titolo = document.getElementById('n-titolo').value.trim();
+    holder.querySelector('#n-salva').addEventListener('click', function () {
+      var titolo = holder.querySelector('#n-titolo').value.trim();
       if (!titolo) { alert('Il titolo è obbligatorio.'); return; }
       var payload = {
         titolo: titolo,
-        sottotitolo: document.getElementById('n-sottotitolo').value.trim(),
-        data_testo: document.getElementById('n-data').value.trim(),
-        data_iso: document.getElementById('n-dataiso').value,
-        luogo: document.getElementById('n-luogo').value.trim(),
-        dettaglio: document.getElementById('n-dettaglio').value.trim(),
-        stato: document.getElementById('n-stato').value,
-        ordine: Number(document.getElementById('n-ordine').value) || 0,
-        adattamento_immagine: document.getElementById('n-adatta').value,
+        sottotitolo: holder.querySelector('#n-sottotitolo').value.trim(),
+        data_testo: holder.querySelector('#n-data').value.trim(),
+        data_iso: holder.querySelector('#n-dataiso').value,
+        luogo: holder.querySelector('#n-luogo').value.trim(),
+        dettaglio: holder.querySelector('#n-dettaglio').value.trim(),
+        stato: holder.querySelector('#n-stato').value,
+        ordine: Number(holder.querySelector('#n-ordine').value) || 0,
+        adattamento_immagine: holder.querySelector('#n-adatta').value,
         descrizione: leggiDescrizione('n-descrizione'),
       };
-      var fileImmagine = document.getElementById('n-imgfile').files[0];
+      var fileImmagine = holder.querySelector('#n-imgfile').files[0];
 
       fetch('/api/eventi', {
         method: 'POST',
@@ -348,14 +403,17 @@
           }
         })
         .then(function () {
-          nuovoHolder.innerHTML = '';
+          chiudiFormNuovo();
           carica();
         })
         .catch(function () { alert('Non sono riuscito a creare l\'appuntamento. Riprova.'); });
     });
   }
 
-  btnNuovo.addEventListener('click', mostraFormNuovo);
+  btnNuovo.addEventListener('click', function () { mostraFormNuovo(nuovoHolder); });
+  if (btnNuovoBottom && nuovoHolderBottom) {
+    btnNuovoBottom.addEventListener('click', function () { mostraFormNuovo(nuovoHolderBottom); });
+  }
 
   carica();
 })();
