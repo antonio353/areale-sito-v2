@@ -72,6 +72,26 @@
   .evento-card .btn-outline{ padding:0.55em 1.2em; font-size:0.85rem; }
   .evento-actions .btn-outline{ margin-right:10px; }
   .admin-bottom-add{ margin-top:8px; text-align:center; }
+
+  /* aziende partecipanti (pannello) */
+  .azienda-lista{ display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+  .azienda-riga{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--stone);
+  }
+  .azienda-logo-preview{
+    width:44px; height:44px; border-radius:50%; object-fit:cover;
+    border:1px solid var(--line); flex-shrink:0; background:var(--paper);
+  }
+  .azienda-logo-vuoto{
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.6rem; line-height:1.1; color:var(--ink-soft); text-align:center; padding:2px;
+  }
+  .azienda-nome{ flex:1 1 180px; min-width:140px; }
+  .azienda-nota{ font-size:0.78rem; color:var(--ink-soft); font-style:italic; }
+  .azienda-logo-file{ font-size:0.78rem; max-width:150px; }
+  .azienda-logo-btn{ padding:0.45em 1em; font-size:0.78rem; }
+  .azienda-rimuovi{ font-size:0.78rem; padding:0.45em 0.9em; }
 </style>
 </head>
 <body>
@@ -108,6 +128,6 @@
   <div id="nuovo-holder-bottom"></div>
 </div>
 
-<script src="admin-eventi.js?v=7"></script>
+<script src="admin-eventi.js?v=8"></script>
 </body>
 </html>

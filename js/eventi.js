@@ -132,6 +132,31 @@
     });
   }
 
+  // --- aziende partecipanti: <div data-evento-aziende="slug">segnaposto</div> ---
+  function aziendaItemHtml(az) {
+    var nome = az && az.nome ? String(az.nome) : '';
+    if (!nome) return '';
+    var visual = az.logo
+      ? '<img class="logo-placeholder" src="' + escHtml(az.logo) + '" alt="Logo ' + escHtml(nome) + '">'
+      : '<div class="logo-placeholder">' + escHtml(nome.charAt(0).toUpperCase()) + '</div>';
+    return '<div class="azienda">' + visual + '<span>' + escHtml(nome) + '</span></div>';
+  }
+
+  function hydrateAziende(bySlug) {
+    document.querySelectorAll('[data-evento-aziende]').forEach(function (el) {
+      var slug = el.getAttribute('data-evento-aziende');
+      var ev = bySlug[slug];
+      if (!ev) return;
+      var lista = Array.isArray(ev.aziende) ? ev.aziende.filter(function (a) { return a && a.nome; }) : [];
+      if (!lista.length) return; // nessuna azienda inserita dal pannello: resta il segnaposto nell'HTML
+      el.innerHTML = lista.map(aziendaItemHtml).join('');
+      // nelle pagine generate automaticamente la sezione parte nascosta
+      // (non c'è un segnaposto sensato da mostrare finché non c'è nulla)
+      var sezione = el.closest('[data-evento-aziende-sezione]');
+      if (sezione) sezione.hidden = false;
+    });
+  }
+
   // --- "prossimo appuntamento" in home: sceglie l'evento in programma con
   // la data (data_iso) più vicina a oggi, non più uno slug fisso ---
   function dataIsoValida(s) {
@@ -400,6 +425,7 @@
         var bySlug = {};
         eventi.forEach(function (e) { bySlug[e.slug] = e; });
         hydrateCampi(bySlug);
+        hydrateAziende(bySlug);
         hydrateProssimo(eventi);
         hydrateUltimo(eventi);
         hydratePassati(eventi);

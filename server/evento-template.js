@@ -94,6 +94,15 @@ function eventoPageHtml(ev) {
   </div>
 </section>
 
+<section data-evento-aziende-sezione hidden>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Le aziende partecipanti</h2>
+    </div>
+    <div class="aziende-grid" data-evento-aziende="${slug}"></div>
+  </div>
+</section>
+
 <section class="alt-bg">
   <div class="wrap">
     <div class="section-head">
@@ -142,7 +151,7 @@ function eventoPageHtml(ev) {
 </footer>
 
 <script src="js/main.js?v=6"></script>
-<script src="js/eventi.js?v=11"></script>
+<script src="js/eventi.js?v=12"></script>
 </body>
 </html>
 `;

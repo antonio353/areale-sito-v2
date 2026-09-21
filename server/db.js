@@ -201,16 +201,18 @@ async function init() {
       immagine     TEXT,
       adattamento_immagine TEXT NOT NULL DEFAULT 'cover',
       dettaglio    TEXT NOT NULL DEFAULT '',
+      aziende      TEXT NOT NULL DEFAULT '[]',
       aggiornato_il TEXT NOT NULL
     );
   `);
 
-  // installazioni precedenti a data_iso/immagine/adattamento_immagine/dettaglio:
-  // aggiunge le colonne se mancano, senza toccare i dati già presenti
+  // installazioni precedenti a data_iso/immagine/adattamento_immagine/dettaglio/
+  // aziende: aggiunge le colonne se mancano, senza toccare i dati già presenti
   ensureColumn('eventi', 'data_iso', 'TEXT');
   ensureColumn('eventi', 'immagine', 'TEXT');
   const adattamentoAppenaAggiunto = ensureColumn('eventi', 'adattamento_immagine', "TEXT NOT NULL DEFAULT 'cover'");
   const dettaglioAppenaAggiunto = ensureColumn('eventi', 'dettaglio', "TEXT NOT NULL DEFAULT ''");
+  ensureColumn('eventi', 'aziende', "TEXT NOT NULL DEFAULT '[]'");
 
   backfillDateIsoIfMissing();
   if (adattamentoAppenaAggiunto) backfillAdattamentoImmagineBarolo();
@@ -282,6 +284,37 @@ function runSelect(sql, params = []) {
   return rows;
 }
 
+// "aziende" (le cantine/aziende partecipanti a un appuntamento, con nome e
+// logo facoltativo) è salvato nel database come testo JSON in un'unica
+// colonna — niente di più di un piccolo elenco per evento, non serve una
+// tabella a parte. Queste due funzioni convertono avanti e indietro tra il
+// testo salvato e l'elenco vero e proprio che usano client e pagine.
+function parseAziendeSalvate(testo) {
+  try {
+    const lista = JSON.parse(testo || '[]');
+    return Array.isArray(lista) ? lista : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function sanitizeAziende(valore) {
+  const lista = Array.isArray(valore) ? valore : [];
+  return lista
+    .map((a) => ({
+      nome: String((a && a.nome) || '').trim().slice(0, 120),
+      logo: String((a && a.logo) || '').trim(),
+    }))
+    .filter((a) => a.nome);
+}
+
+// converte la colonna "aziende" (testo JSON) in un vero elenco prima di
+// restituire l'evento a chi lo usa (API pubblica, pannello, pagine evento)
+function decorateEvento(row) {
+  if (!row) return row;
+  return { ...row, aziende: parseAziendeSalvate(row.aziende) };
+}
+
 function getAllEventi({ stato } = {}) {
   let sql = 'SELECT * FROM eventi WHERE 1=1';
   const params = [];
@@ -290,12 +323,12 @@ function getAllEventi({ stato } = {}) {
     params.push(stato);
   }
   sql += ' ORDER BY stato ASC, ordine ASC, id ASC';
-  return runSelect(sql, params);
+  return runSelect(sql, params).map(decorateEvento);
 }
 
 function getEvento(slugOrId) {
   const rows = runSelect('SELECT * FROM eventi WHERE slug = ? OR CAST(id AS TEXT) = ?', [String(slugOrId), String(slugOrId)]);
-  return rows[0] || null;
+  return rows[0] ? decorateEvento(rows[0]) : null;
 }
 
 function slugify(s) {
@@ -318,8 +351,8 @@ function createEvento(e) {
 
   const aggiornato_il = new Date().toISOString();
   db.run(
-    `INSERT INTO eventi (slug, titolo, sottotitolo, data_testo, data_iso, luogo, descrizione, stato, ordine, immagine, adattamento_immagine, dettaglio, aggiornato_il)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO eventi (slug, titolo, sottotitolo, data_testo, data_iso, luogo, descrizione, stato, ordine, immagine, adattamento_immagine, dettaglio, aziende, aggiornato_il)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       slug,
       e.titolo || 'Nuovo appuntamento',
@@ -333,6 +366,7 @@ function createEvento(e) {
       e.immagine || '',
       e.adattamento_immagine === 'contain' ? 'contain' : 'cover',
       e.dettaglio || '',
+      JSON.stringify(sanitizeAziende(e.aziende)),
       aggiornato_il,
     ]
   );
@@ -340,7 +374,7 @@ function createEvento(e) {
   return getEvento(slug);
 }
 
-const EVENTO_CAMPI_MODIFICABILI = ['titolo', 'sottotitolo', 'data_testo', 'data_iso', 'luogo', 'descrizione', 'stato', 'ordine', 'immagine', 'adattamento_immagine', 'dettaglio'];
+const EVENTO_CAMPI_MODIFICABILI = ['titolo', 'sottotitolo', 'data_testo', 'data_iso', 'luogo', 'descrizione', 'stato', 'ordine', 'immagine', 'adattamento_immagine', 'dettaglio', 'aziende'];
 
 function updateEvento(id, campi) {
   const esistente = getEvento(id);
@@ -354,6 +388,7 @@ function updateEvento(id, campi) {
       let valore = campi[campo];
       if (campo === 'ordine') valore = Number(valore) || 0;
       if (campo === 'adattamento_immagine') valore = valore === 'contain' ? 'contain' : 'cover';
+      if (campo === 'aziende') valore = JSON.stringify(sanitizeAziende(valore));
       params.push(valore);
     }
   }

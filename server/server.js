@@ -81,6 +81,39 @@ function pulisciVecchieImmagini(slug, fileDaTenere) {
   }
 }
 
+// logo di una singola azienda partecipante: stesso principio dell'immagine
+// di copertina dell'evento, ma un file per ogni azienda (distinto dal suo
+// indice nell'elenco), quindi il nome del file include anche quello
+const uploadLogoAzienda = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, IMG_EVENTI_DIR),
+    filename: (req, file, cb) => {
+      const ev = db.eventi.get(req.params.id);
+      const base = ev ? ev.slug : 'evento-' + Date.now();
+      const ext = (path.extname(file.originalname) || '.jpg').toLowerCase();
+      cb(null, base + '-azienda-' + req.params.index + ext);
+    },
+  }),
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) return cb(null, true);
+    cb(new Error('Formato immagine non supportato (usa JPG, PNG, WEBP o GIF).'));
+  },
+});
+
+function pulisciVecchiLoghiAzienda(slug, index, fileDaTenere) {
+  try {
+    const prefisso = slug + '-azienda-' + index + '.';
+    fs.readdirSync(IMG_EVENTI_DIR).forEach((f) => {
+      if (f !== fileDaTenere && f.startsWith(prefisso)) {
+        fs.unlinkSync(path.join(IMG_EVENTI_DIR, f));
+      }
+    });
+  } catch (e) {
+    // non bloccante
+  }
+}
+
 // ==========================================================================
 // MODIFICA QUI per cambiare le credenziali di accesso ai pannelli:
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
@@ -203,6 +236,33 @@ app.post('/api/eventi/:id/immagine', auth, (req, res) => {
 
     pulisciVecchieImmagini(ev.slug, req.file.filename);
     const aggiornato = db.eventi.update(ev.id, { immagine: 'img/eventi/' + req.file.filename });
+    res.json({ ok: true, evento: aggiornato });
+  });
+});
+
+// logo di una singola azienda partecipante, individuata dalla sua posizione
+// (:index) nell'elenco "aziende" già salvato per l'appuntamento
+app.post('/api/eventi/:id/aziende/:index/logo', auth, (req, res) => {
+  uploadLogoAzienda.single('logo')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ ok: false, error: err.message || 'Errore nel caricamento del file.' });
+    }
+    const ev = db.eventi.get(req.params.id);
+    if (!ev) return res.status(404).json({ ok: false, error: 'Appuntamento non trovato.' });
+    if (!req.file) return res.status(400).json({ ok: false, error: 'Nessun file ricevuto.' });
+
+    const index = Number(req.params.index);
+    const aziende = Array.isArray(ev.aziende) ? ev.aziende.slice() : [];
+    if (!Number.isInteger(index) || index < 0 || index >= aziende.length) {
+      // multer ha già salvato il file prima di questo controllo: lo rimuove,
+      // altrimenti resterebbe orfano sul disco
+      fs.unlink(req.file.path, () => {});
+      return res.status(400).json({ ok: false, error: 'Azienda non trovata (salva prima le modifiche).' });
+    }
+
+    pulisciVecchiLoghiAzienda(ev.slug, index, req.file.filename);
+    aziende[index] = { ...aziende[index], logo: 'img/eventi/' + req.file.filename };
+    const aggiornato = db.eventi.update(ev.id, { aziende });
     res.json({ ok: true, evento: aggiornato });
   });
 });

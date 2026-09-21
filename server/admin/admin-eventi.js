@@ -132,6 +132,105 @@
     return '<div class="img-preview-empty">Nessuna immagine caricata</div>';
   }
 
+  // --- aziende partecipanti (mostrate nella pagina dedicata dell'evento) ---
+  function aziendaLogoPreviewHtml(azienda) {
+    if (azienda && azienda.logo) {
+      return '<img class="azienda-logo-preview" src="' + escHtml(azienda.logo) + '?t=' + Date.now() + '" alt="Logo">';
+    }
+    return '<div class="azienda-logo-preview azienda-logo-vuoto">Nessun logo</div>';
+  }
+
+  // "isNuova" = riga aggiunta ora, non ancora salvata sul server: non ha
+  // ancora un indice stabile, quindi non si può caricare il logo finché non
+  // si salvano prima le modifiche (il pulsante "Carica logo" ha bisogno di
+  // sapere a quale azienda dell'elenco già salvato corrisponde)
+  function aziendaRigaHtml(azienda, index, isNuova) {
+    var controlliLogo = isNuova
+      ? '<span class="azienda-nota">Salva le modifiche per poter caricare il logo</span>'
+      : (
+          '<input type="file" accept="image/*" class="azienda-logo-file">' +
+          '<button type="button" class="btn btn-outline azienda-logo-btn" data-action="azienda-carica-logo" data-index="' + index + '">Carica logo</button>'
+        );
+    return (
+      '<div class="azienda-riga">' +
+        aziendaLogoPreviewHtml(azienda) +
+        '<input type="text" class="azienda-nome" placeholder="Nome azienda" value="' + escHtml(azienda && azienda.nome) + '">' +
+        controlliLogo +
+        '<button type="button" class="btn-del azienda-rimuovi" data-action="azienda-rimuovi">Rimuovi</button>' +
+      '</div>'
+    );
+  }
+
+  function aziendeBlockHtml(aziende) {
+    var righe = (aziende || []).map(function (az, i) { return aziendaRigaHtml(az, i, false); }).join('');
+    return (
+      '<div class="campo full">' +
+        '<label>Aziende partecipanti (mostrate nella pagina dedicata dell\'evento)</label>' +
+        '<div class="azienda-lista" data-role="azienda-lista">' + righe + '</div>' +
+        '<button type="button" class="btn-ghost" data-action="azienda-aggiungi">+ Aggiungi azienda</button>' +
+      '</div>'
+    );
+  }
+
+  // collega i pulsanti "+ Aggiungi azienda" / "Rimuovi" / "Carica logo" di
+  // un blocco aziende, dentro una scheda esistente o il form "nuovo
+  // appuntamento": "idEvento" è null per un appuntamento non ancora creato
+  // (il caricamento del logo lì non è comunque disponibile)
+  function attaccaAziende(root, idEvento, onDopoCaricoLogo) {
+    var lista = root.querySelector('[data-role="azienda-lista"]');
+    var btnAggiungi = root.querySelector('[data-action="azienda-aggiungi"]');
+    if (!lista || !btnAggiungi) return;
+
+    btnAggiungi.addEventListener('click', function () {
+      var wrapper = document.createElement('div');
+      wrapper.innerHTML = aziendaRigaHtml({ nome: '', logo: '' }, -1, true);
+      lista.appendChild(wrapper.firstChild);
+    });
+
+    lista.addEventListener('click', function (e) {
+      var btnRimuovi = e.target.closest('[data-action="azienda-rimuovi"]');
+      if (btnRimuovi) {
+        btnRimuovi.closest('.azienda-riga').remove();
+        return;
+      }
+      var btnLogo = e.target.closest('[data-action="azienda-carica-logo"]');
+      if (btnLogo && idEvento) {
+        var riga = btnLogo.closest('.azienda-riga');
+        var fileInput = riga.querySelector('.azienda-logo-file');
+        var file = fileInput.files[0];
+        if (!file) { alert('Scegli prima un file immagine.'); return; }
+        var indice = btnLogo.getAttribute('data-index');
+        var fd = new FormData();
+        fd.append('logo', file);
+        btnLogo.disabled = true;
+        fetch('/api/eventi/' + idEvento + '/aziende/' + indice + '/logo', { method: 'POST', body: fd })
+          .then(function (r) {
+            return r.json().then(function (data) {
+              if (!r.ok || !data.ok) throw new Error(data.error || 'Errore nel caricamento.');
+              return data;
+            });
+          })
+          .then(function () { if (onDopoCaricoLogo) onDopoCaricoLogo(); })
+          .catch(function (err) {
+            alert('Non sono riuscito a caricare il logo: ' + (err.message || 'errore sconosciuto'));
+            btnLogo.disabled = false;
+          });
+      }
+    });
+  }
+
+  // legge dal DOM l'elenco aggiornato delle aziende (nome scritto + logo già
+  // presente, letto dall'anteprima) — usato sia per "Salva modifiche" sia
+  // per la creazione di un nuovo appuntamento
+  function leggiAziende(root) {
+    return Array.prototype.slice.call(root.querySelectorAll('.azienda-riga')).map(function (riga) {
+      var nome = riga.querySelector('.azienda-nome').value.trim();
+      var logoImg = riga.querySelector('.azienda-logo-preview');
+      var logo = (logoImg && logoImg.tagName === 'IMG') ? logoImg.getAttribute('src').split('?')[0] : '';
+      return { nome: nome, logo: logo };
+    }).filter(function (a) { return a.nome; });
+  }
+
   function cardHtml(ev) {
     var id = ev.id;
     return (
@@ -176,6 +275,7 @@
               '</div>' +
             '</div>' +
           '</div>' +
+          aziendeBlockHtml(ev.aziende) +
         '</div>' +
         '<div class="evento-actions">' +
           '<div>' +
@@ -204,12 +304,14 @@
       ordine: Number(card.querySelector('#ordine-' + id).value) || 0,
       adattamento_immagine: card.querySelector('#adatta-' + id).value,
       descrizione: leggiDescrizione('descrizione-' + id),
+      aziende: leggiAziende(card),
     };
   }
 
   function attacca(card) {
     var id = card.getAttribute('data-id');
     attaccaRte(card);
+    attaccaAziende(card, id, function () { carica(); });
 
     card.querySelector('[data-action="salva"]').addEventListener('click', function () {
       var payload = leggiCampi(card);
@@ -220,9 +322,20 @@
       })
         .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
         .then(function (res) {
+          eventiPerId[id] = res.evento;
           var pill = card.querySelector('.pill');
           pill.className = 'pill ' + res.evento.stato;
           pill.textContent = res.evento.stato === 'svolto' ? 'Svolto' : 'In programma';
+
+          // rigenera il blocco aziende con l'elenco appena salvato: le eventuali
+          // aziende appena aggiunte ottengono così un indice stabile e possono
+          // ricevere un logo (il resto della scheda non viene toccato)
+          var vecchioBlocco = card.querySelector('[data-role="azienda-lista"]').closest('.campo.full');
+          var nuovoBloccoWrap = document.createElement('div');
+          nuovoBloccoWrap.innerHTML = aziendeBlockHtml(res.evento.aziende);
+          vecchioBlocco.replaceWith(nuovoBloccoWrap.firstChild);
+          attaccaAziende(card, id, function () { carica(); });
+
           var msg = card.querySelector('[data-role="salvato"]');
           msg.classList.add('show');
           setTimeout(function () { msg.classList.remove('show'); }, 1800);
@@ -246,6 +359,7 @@
         adattamento_immagine: ev.adattamento_immagine || 'cover',
         descrizione: ev.descrizione || '',
         immagine: ev.immagine || '', // stessa immagine dell'originale: nessun nuovo caricamento necessario
+        aziende: (Array.isArray(ev.aziende) ? ev.aziende : []).map(function (a) { return { nome: a.nome, logo: a.logo }; }),
       };
       btnDup.disabled = true;
       fetch('/api/eventi', {
@@ -360,6 +474,7 @@
             '<label for="n-imgfile">Immagine di presentazione (facoltativa, puoi aggiungerla anche dopo)</label>' +
             '<input type="file" accept="image/*" id="n-imgfile">' +
           '</div>' +
+          aziendeBlockHtml([]) +
         '</div>' +
         '<div class="evento-actions">' +
           '<button type="button" class="btn btn-primary" id="n-salva">Crea appuntamento</button>' +
@@ -368,6 +483,7 @@
       '</div>';
 
     attaccaRte(holder);
+    attaccaAziende(holder, null, null); // niente logo prima della creazione: solo nome e ordine
 
     holder.querySelector('#n-annulla').addEventListener('click', function () {
       chiudiFormNuovo();
@@ -386,6 +502,7 @@
         ordine: Number(holder.querySelector('#n-ordine').value) || 0,
         adattamento_immagine: holder.querySelector('#n-adatta').value,
         descrizione: leggiDescrizione('n-descrizione'),
+        aziende: leggiAziende(holder),
       };
       var fileImmagine = holder.querySelector('#n-imgfile').files[0];
 
