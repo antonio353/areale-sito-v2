@@ -137,7 +137,7 @@
     var nome = az && az.nome ? String(az.nome) : '';
     if (!nome) return '';
     var visual = az.logo
-      ? '<img class="logo-placeholder" src="' + escHtml(az.logo) + '" alt="Logo ' + escHtml(nome) + '">'
+      ? '<img class="azienda-logo" src="' + escHtml(az.logo) + '" alt="Logo ' + escHtml(nome) + '">'
       : '<div class="logo-placeholder">' + escHtml(nome.charAt(0).toUpperCase()) + '</div>';
     return '<div class="azienda">' + visual + '<span>' + escHtml(nome) + '</span></div>';
   }

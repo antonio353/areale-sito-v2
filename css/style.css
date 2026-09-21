@@ -698,10 +698,10 @@ textarea{ resize: vertical; min-height: 100px; }
 }
 .lightbox-close:hover{ background: rgba(255,255,255,0.18); }
 
-/* -------------------- aziende partecipanti (griglia segnaposto) -------------------- */
+/* -------------------- aziende partecipanti -------------------- */
 .aziende-grid{
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 20px;
   margin-top: 1.8em;
 }
@@ -709,11 +709,14 @@ textarea{ resize: vertical; min-height: 100px; }
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   text-align: center;
-  padding: 20px 12px;
+  padding: 18px 14px;
   border: 1px dashed var(--line);
+  min-height: 140px;
 }
+/* segnaposto (nessun logo caricato): cerchio con l'iniziale del nome */
 .azienda .logo-placeholder{
   width: 68px;
   height: 68px;
@@ -726,7 +729,19 @@ textarea{ resize: vertical; min-height: 100px; }
   font-family: var(--display);
   font-size: 1.3rem;
   color: var(--ink-soft);
-  object-fit: cover;
+}
+/* logo vero caricato dal pannello: mostrato per intero (non ritagliato in
+   un cerchio, che a queste dimensioni lo rende illeggibile), più grande */
+.azienda .azienda-logo{
+  display: block;
+  width: 100%;
+  height: 84px;
+  max-width: 140px;
+  object-fit: contain;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
 }
 .azienda span{ font-size: 0.9rem; color: var(--ink-soft); }
 
